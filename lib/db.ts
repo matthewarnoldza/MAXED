@@ -15,17 +15,3 @@ export function getDb(): Client | null {
   _client = createClient({ url, authToken });
   return _client;
 }
-
-/** Look up an exercise id by name, inserting the row if it's new. */
-export async function ensureExerciseId(db: Client, name: string): Promise<number> {
-  const found = await db.execute({
-    sql: "SELECT id FROM exercises WHERE name = ?",
-    args: [name],
-  });
-  if (found.rows[0]) return Number(found.rows[0].id);
-  const ins = await db.execute({
-    sql: "INSERT INTO exercises (name) VALUES (?)",
-    args: [name],
-  });
-  return Number(ins.lastInsertRowid);
-}

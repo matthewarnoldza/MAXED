@@ -8,21 +8,26 @@ export interface RawWorkout {
   exercises: { name: string; sets: number; reps: number; load: string; note: string }[];
 }
 
+export interface GenerateArgs {
+  apiKey: string;
+  model: string;
+  context: string;
+  request: string;
+  draft?: RawWorkout;
+}
+
 /**
  * Call OpenRouter with the athlete context packet + the user's request, forcing
- * JSON out via response_format json_schema. The key never leaves the server.
+ * JSON out via response_format json_schema. The key is supplied by the caller
+ * (server env var, or the user's own key passed from the client) and is used
+ * only for this request — it is never logged or stored.
  */
-export async function generateWorkout(
-  athleteContext: string,
-  userRequest: string,
-  draft?: RawWorkout
-): Promise<RawWorkout> {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) throw new Error("OPENROUTER_API_KEY not set");
-  const model = process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4.6";
+export async function generateWorkout({ apiKey, model, context, request, draft }: GenerateArgs): Promise<RawWorkout> {
+  const key = apiKey;
+  if (!key) throw new Error("No OpenRouter API key");
 
   const messages: { role: string; content: string }[] = [
-    { role: "system", content: `${SYSTEM_PROMPT}\n\n${athleteContext}` },
+    { role: "system", content: `${SYSTEM_PROMPT}\n\n${context}` },
   ];
   if (draft) {
     messages.push({
@@ -31,10 +36,10 @@ export async function generateWorkout(
     });
     messages.push({
       role: "user",
-      content: `Refine the workout above. ${userRequest}`,
+      content: `Refine the workout above. ${request}`,
     });
   } else {
-    messages.push({ role: "user", content: userRequest });
+    messages.push({ role: "user", content: request });
   }
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {

@@ -46,6 +46,8 @@ const doSeed = args.has("--seed");
 const client = createClient({ url, authToken });
 
 const DROP = `
+DROP TABLE IF EXISTS user_state;
+DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS sets;
 DROP TABLE IF EXISTS workout_exercises;
 DROP TABLE IF EXISTS workouts;

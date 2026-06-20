@@ -1,34 +1,44 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
-import { buildAthleteContext } from "@/lib/context";
 import { generateWorkout, type RawWorkout } from "@/lib/openrouter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const FALLBACK_CONTEXT = `# ATHLETE PROFILE
-(no database connected — generating without memory)
+(no profile provided — generating without memory)
 - Goal: general strength + muscle
 - Banned: none`;
 
+/**
+ * The memory packet is built on the client (lib/profile.ts) from the signed-in
+ * user's own logged history and sent here as `context`. The key may come from the
+ * server env (deploys) or the user's own key from the client; it's used only for
+ * this request. When there's no key at all we return `no-key` so the client falls
+ * back to its on-device coach.
+ */
 export async function POST(req: Request) {
   try {
-    const { prompt, draft } = (await req.json()) as {
-      prompt?: string;
-      draft?: RawWorkout;
-    };
+    const { prompt, draft, context: clientContext, apiKey: clientKey, model: clientModel } =
+      (await req.json()) as {
+        prompt?: string;
+        draft?: RawWorkout;
+        context?: string;
+        apiKey?: string;
+        model?: string;
+      };
     if (!prompt || !prompt.trim()) {
       return NextResponse.json({ error: "Missing prompt" }, { status: 400 });
     }
 
-    // 1. Assemble the memory packet from Turso (server-side).
-    const db = getDb();
-    const context = db ? await buildAthleteContext(db) : FALLBACK_CONTEXT;
+    const apiKey = process.env.OPENROUTER_API_KEY || clientKey;
+    if (!apiKey) {
+      return NextResponse.json({ error: "no-key" }, { status: 400 });
+    }
 
-    // 2. Packet + request → OpenRouter, forced JSON out.
-    const raw = await generateWorkout(context, prompt.trim(), draft);
+    const context = clientContext || FALLBACK_CONTEXT;
+    const model = clientModel || process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4.6";
 
-    // 3. Shape for the preview UI.
+    const raw = await generateWorkout({ apiKey, model, context, request: prompt.trim(), draft });
     return NextResponse.json({ plan: toPlan(raw, prompt.trim()), raw });
   } catch (err) {
     const message = err instanceof Error ? err.message : "generation failed";
