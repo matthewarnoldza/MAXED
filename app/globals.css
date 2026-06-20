@@ -1,0 +1,152 @@
+/* ============================================================
+   MAXED — global styles & design tokens
+   Brutalist HUD. The weight number is the hero; everything else
+   is monospace scaffolding and 2px rules, one red signal colour.
+   ============================================================ */
+
+:root {
+  /* font-family vars are populated by next/font in layout.tsx */
+  --font-anton: "Anton", sans-serif;
+  --font-archivo: "Archivo", -apple-system, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* ---- Themed tokens (flip on data-mx-theme) ---- */
+[data-mx-theme="light"] {
+  --mx-bg: #f4f4f0;
+  --mx-ink: #111111;
+  --mx-line: rgba(0, 0, 0, 0.16);
+  --mx-soft: rgba(0, 0, 0, 0.05);
+  --mx-sub: #7a7a76;
+  --mx-accent: #ff2d00;
+  --mx-on-accent: #ffffff;
+  --mx-chrome: #111111;
+}
+[data-mx-theme="dark"] {
+  --mx-bg: #0b0b0b;
+  --mx-ink: #f4f4f0;
+  --mx-line: rgba(255, 255, 255, 0.15);
+  --mx-soft: rgba(255, 255, 255, 0.05);
+  --mx-sub: #8a8a86;
+  --mx-accent: #ff3b12;
+  --mx-on-accent: #ffffff;
+  --mx-chrome: #f4f4f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* deep frame colour shows in the desktop letterbox / before first paint */
+html {
+  background: #111113;
+}
+
+body {
+  font-family: var(--font-archivo);
+  background: var(--mx-bg);
+  color: var(--mx-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* hide scrollbars — brutalist, full-bleed */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+* {
+  scrollbar-width: none;
+}
+
+button {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input {
+  font-family: inherit;
+}
+
+.mxin::placeholder {
+  color: var(--mx-sub);
+  opacity: 1;
+}
+
+/* ---- Keyframes (ported from prototype) ---- */
+@keyframes pbpop {
+  0% {
+    transform: scale(0.6) rotate(-3deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.12) rotate(-3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-3deg);
+    opacity: 1;
+  }
+}
+@keyframes flashfade {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes glowpulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes loadbar {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+@keyframes screenIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
