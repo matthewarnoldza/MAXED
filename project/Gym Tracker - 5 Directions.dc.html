@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;}
+  *{box-sizing:border-box;}
+  ::-webkit-scrollbar{width:0;height:0;}
+  @keyframes pbpop{0%{transform:scale(.6);opacity:0}55%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
+  @keyframes flashfade{0%{opacity:0}25%{opacity:.55}100%{opacity:0}}
+  @keyframes glowpulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes risein{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  [data-mx-root]{--mx-bg:#F4F4F0;--mx-ink:#111111;--mx-line:rgba(0,0,0,.18);--mx-sub:#777777;--mx-accent:#FF2D00;}
+  [data-mx-root][data-mx-theme="dark"]{--mx-bg:#0B0B0B;--mx-ink:#F4F4F0;--mx-line:rgba(255,255,255,.16);--mx-sub:#8a8a8a;--mx-accent:#FF3B12;}
+</style>
+</helmet>
+
+<div style="min-width:100%;min-height:100vh;width:max-content;box-sizing:border-box;padding:56px 64px 80px;background:#e7e5e2;font-family:-apple-system,system-ui,sans-serif;">
+
+  <div style="margin-bottom:48px;max-width:760px;">
+    <div style="font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:3px;color:#9a948c;text-transform:uppercase;">Personal Gym Tracker · PWA · iOS-first</div>
+    <h1 style="font:800 38px/1.05 -apple-system,system-ui;color:#1d1b18;margin:14px 0 10px;letter-spacing:-1px;">Five directions for the set logger</h1>
+    <p style="font:400 16px/1.5 -apple-system,system-ui;color:#6b655d;margin:0;">Each direction pairs a <b style="color:#1d1b18;">Home</b> screen with the hero <b style="color:#1d1b18;">Active Workout / Set Logger</b>. Tap the steppers and wheels, fire a set to beat a PB, watch the rest timer tick. Metric · 2.5&nbsp;kg default increment.</p>
+  </div>
+
+  <!-- ===================== AURORA ===================== -->
+  <section data-screen-label="Aurora — Apple-native" style="display:flex;gap:40px;align-items:flex-start;margin-bottom:64px;">
+    <div style="flex:none;width:296px;padding-top:10px;">
+      <div style="font:800 26px/1 -apple-system;color:#1d1b18;letter-spacing:-.5px;">Aurora</div>
+      <div style="font:italic 400 15px/1.4 'Spectral',serif;color:#6b655d;margin:8px 0 18px;">Calm and native — like it shipped inside iOS Health.</div>
+      <div style="display:flex;gap:7px;margin-bottom:16px;">
+        <span style="width:26px;height:26px;border-radius:7px;background:#F2F2F7;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#007AFF;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#34C759;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#1C1C1E;"></span>
+      </div>
+      <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font:500 13px/1.4 -apple-system;color:#1d1b18;">
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">TYPE</dt><dd style="margin:0;">SF Pro · rounded numerals</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">ENTRY</dt><dd style="margin:0;">Circular +/− steppers, tap-to-type</dd>
+      </dl>
+      <p style="font:400 13.5px/1.55 -apple-system;color:#6b655d;margin:16px 0 0;">For someone who wants it to feel system-native and frictionless. Big soft steppers and ghosted last-session targets make &ldquo;did I beat it?&rdquo; obvious without a manual.</p>
+    </div>
+
+    <!-- Aurora HOME -->
+    <dc-import name="IPhone" bg="#F2F2F7" chrome="#1C1C1E" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:62px 20px 34px;display:flex;flex-direction:column;font-family:-apple-system,system-ui;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font:500 15px/1 #8E8E93;color:#8E8E93;">Wednesday, 12 Mar</div>
+            <div style="font:700 30px/1.1 -apple-system;color:#1C1C1E;letter-spacing:-.6px;margin-top:4px;">Good morning</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:20px;padding:7px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+            <svg width="14" height="16" viewBox="0 0 14 16" fill="#FF9500"><path d="M7 0c1 3-2 4-2 7a3 3 0 0 0 6 0c0-1-.4-1.8-.4-1.8C12 6 12 9 12 10A5 5 0 0 1 2 10C2 5 6 4 7 0z"/></svg>
+            <span style="font:700 14px/1 -apple-system;color:#1C1C1E;">12</span>
+          </div>
+        </div>
+
+        <div style="margin-top:22px;background:#fff;border-radius:22px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+          <div style="font:600 13px/1 #007AFF;color:#007AFF;letter-spacing:.3px;text-transform:uppercase;">Today</div>
+          <div style="font:700 24px/1.1 -apple-system;color:#1C1C1E;margin:6px 0 3px;letter-spacing:-.4px;">Push Day A</div>
+          <div style="font:500 14px/1 #8E8E93;color:#8E8E93;">5 exercises · ~48 min</div>
+          <div style="display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;">
+            <span style="font:500 12px/1 -apple-system;color:#3A3A3C;background:#F2F2F7;border-radius:8px;padding:7px 10px;">Bench Press</span>
+            <span style="font:500 12px/1 -apple-system;color:#3A3A3C;background:#F2F2F7;border-radius:8px;padding:7px 10px;">Incline DB</span>
+            <span style="font:500 12px/1 -apple-system;color:#3A3A3C;background:#F2F2F7;border-radius:8px;padding:7px 10px;">Dips</span>
+            <span style="font:500 12px/1 -apple-system;color:#8E8E93;background:#F2F2F7;border-radius:8px;padding:7px 10px;">+2</span>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;background:#fff;border-radius:18px;padding:6px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #F2F2F7;">
+            <div><div style="font:600 15px/1.2 -apple-system;color:#1C1C1E;">Pull Day B</div><div style="font:500 12px/1 #8E8E93;color:#8E8E93;margin-top:4px;">Mon · 18 sets</div></div>
+            <span style="font:700 11px/1 -apple-system;color:#34C759;background:rgba(52,199,89,.12);border-radius:7px;padding:6px 8px;">2 PBs</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 0;">
+            <div><div style="font:600 15px/1.2 -apple-system;color:#1C1C1E;">Leg Day</div><div style="font:500 12px/1 #8E8E93;color:#8E8E93;margin-top:4px;">Sat · 16 sets</div></div>
+            <span style="font:600 13px/1 #8E8E93;color:#8E8E93;">·</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <button style="width:100%;border:none;background:#007AFF;color:#fff;border-radius:16px;padding:18px;font:600 18px/1 -apple-system;letter-spacing:.2px;box-shadow:0 6px 18px -6px rgba(0,122,255,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;">
+            <svg width="15" height="16" viewBox="0 0 15 16" fill="#fff"><path d="M2 1.5v13l11-6.5z"/></svg>Start workout
+          </button>
+        </div>
+      </div>
+    </dc-import>
+
+    <!-- Aurora LOGGER -->
+    <dc-import name="IPhone" bg="#F2F2F7" chrome="#1C1C1E" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:58px 20px 30px;display:flex;flex-direction:column;font-family:-apple-system,system-ui;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font:600 16px/1 #007AFF;color:#007AFF;display:flex;align-items:center;gap:2px;">‹ Push A</div>
+          <div style="font:500 13px/1 #8E8E93;color:#8E8E93;">Exercise 2 of 5</div>
+        </div>
+        <div style="margin-top:14px;">
+          <div style="font:700 27px/1.05 -apple-system;color:#1C1C1E;letter-spacing:-.5px;">Bench Press</div>
+          <div style="font:500 14px/1 #8E8E93;color:#8E8E93;margin-top:6px;">Last 57.5 × 8 · PB <b style="color:#34C759;">{{ aurora.pbStr }} kg</b></div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ aurora.sets }}" as="set" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:13px 16px;box-shadow:0 1px 2px rgba(0,0,0,.05);">
+              <span style="width:24px;height:24px;border-radius:50%;background:#34C759;color:#fff;display:flex;align-items:center;justify-content:center;font:700 13px/1 -apple-system;">{{ set.n }}</span>
+              <span style="font:600 17px/1 -apple-system;color:#1C1C1E;">{{ set.line }}</span>
+              <sc-if value="{{ set.pb }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font:700 10px/1 -apple-system;color:#34C759;background:rgba(52,199,89,.14);border-radius:6px;padding:5px 7px;letter-spacing:.5px;">PB</span></sc-if>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:center;gap:12px;border:1.5px dashed #C7C7CC;border-radius:14px;padding:13px 16px;">
+            <span style="width:24px;height:24px;border-radius:50%;background:#E5E5EA;color:#8E8E93;display:flex;align-items:center;justify-content:center;font:700 13px/1 -apple-system;">{{ aurora.nextSet }}</span>
+            <span style="font:500 15px/1 #8E8E93;color:#C7C7CC;">target {{ aurora.ghostStr }}</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <sc-if value="{{ aurora.restOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:16px;padding:12px 18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.05);">
+              <div style="display:flex;align-items:center;gap:10px;"><span style="width:9px;height:9px;border-radius:50%;background:#007AFF;animation:glowpulse 1s infinite;"></span><span style="font:500 14px/1 #8E8E93;color:#8E8E93;">Rest</span></div>
+              <span style="font:700 22px/1 'SF Mono','JetBrains Mono',monospace;color:#1C1C1E;font-variant-numeric:tabular-nums;">{{ aurora.restStr }}</span>
+              <button onClick="{{ aurora.doSkip }}" style="border:none;background:#F2F2F7;color:#007AFF;font:600 13px/1 -apple-system;border-radius:9px;padding:9px 14px;cursor:pointer;">Skip</button>
+            </div>
+          </sc-if>
+
+          <div style="background:#fff;border-radius:20px;padding:18px 16px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <button onClick="{{ aurora.decW }}" style="width:56px;height:56px;border:none;border-radius:50%;background:#F2F2F7;color:#1C1C1E;font:300 30px/1 -apple-system;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+              <div style="text-align:center;">
+                <div style="font:700 46px/1 -apple-system;color:#1C1C1E;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;">{{ aurora.wStr }}</div>
+                <div style="font:600 12px/1 #8E8E93;color:#8E8E93;letter-spacing:1px;margin-top:2px;">KG · +2.5</div>
+              </div>
+              <button onClick="{{ aurora.incW }}" style="width:56px;height:56px;border:none;border-radius:50%;background:#007AFF;color:#fff;font:300 30px/1 -apple-system;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px -3px rgba(0,122,255,.5);">+</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid #F2F2F7;">
+              <button onClick="{{ aurora.decR }}" style="width:38px;height:38px;border:none;border-radius:50%;background:#F2F2F7;color:#1C1C1E;font:300 22px/1 -apple-system;cursor:pointer;">−</button>
+              <div style="text-align:center;min-width:64px;"><div style="font:700 24px/1 -apple-system;color:#1C1C1E;">{{ aurora.r }}</div><div style="font:600 11px/1 #8E8E93;color:#8E8E93;letter-spacing:1px;">REPS</div></div>
+              <button onClick="{{ aurora.incR }}" style="width:38px;height:38px;border:none;border-radius:50%;background:#F2F2F7;color:#1C1C1E;font:300 22px/1 -apple-system;cursor:pointer;">+</button>
+            </div>
+          </div>
+          <button onClick="{{ aurora.doLog }}" style="width:100%;border:none;background:#1C1C1E;color:#fff;border-radius:16px;padding:17px;font:600 17px/1 -apple-system;margin-top:12px;cursor:pointer;">Log set {{ aurora.nextSet }}</button>
+        </div>
+
+        <sc-if value="{{ aurora.flash }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:#34C759;animation:flashfade .65s ease-out;pointer-events:none;"></div></sc-if>
+        <sc-if value="{{ aurora.pbFire }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:#34C759;color:#fff;border-radius:18px;padding:18px 28px;font:700 20px/1 -apple-system;box-shadow:0 12px 30px -8px rgba(52,199,89,.6);animation:pbpop .5s ease-out;text-align:center;">New PB! 🎉<div style="font:500 13px/1 -apple-system;opacity:.9;margin-top:6px;">{{ aurora.wStr }} kg bench</div></div></sc-if>
+      </div>
+    </dc-import>
+  </section>
+
+  <!-- ===================== VOLTAGE ===================== -->
+  <section data-screen-label="Voltage — Dark / neon" style="display:flex;gap:40px;align-items:flex-start;margin-bottom:64px;">
+    <div style="flex:none;width:296px;padding-top:10px;">
+      <div style="font:800 26px/1 -apple-system;color:#1d1b18;letter-spacing:-.5px;">Voltage</div>
+      <div style="font:italic 400 15px/1.4 'Spectral',serif;color:#6b655d;margin:8px 0 18px;">Built for the dark gym — one electric line of light.</div>
+      <div style="display:flex;gap:7px;margin-bottom:16px;">
+        <span style="width:26px;height:26px;border-radius:7px;background:#000;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#141414;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#D4FF00;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#6B6B6B;"></span>
+      </div>
+      <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font:500 13px/1.4 -apple-system;color:#1d1b18;">
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">TYPE</dt><dd style="margin:0;">Archivo · condensed grotesk</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">ENTRY</dt><dd style="margin:0;">Vertical scroll wheel (scrub weight)</dd>
+      </dl>
+      <p style="font:400 13.5px/1.55 -apple-system;color:#6b655d;margin:16px 0 0;">OLED black means nothing glows but the data. Scrub the wheel with your thumb, the big number tracks it, and a PB lights the whole screen acid-lime. Maximum glance-ability across a dim room.</p>
+    </div>
+
+    <!-- Voltage HOME -->
+    <dc-import name="IPhone" bg="#000000" chrome="#FFFFFF" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:62px 22px 34px;display:flex;flex-direction:column;font-family:'Archivo',-apple-system;overflow:hidden;color:#fff;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font:600 13px/1 'Archivo';color:#6B6B6B;letter-spacing:2px;">TONIGHT · 19:30</div>
+          <div style="display:flex;align-items:center;gap:6px;"><span style="font:800 18px/1 'Archivo';color:#D4FF00;">12</span><span style="font:600 11px/1 'Archivo';color:#6B6B6B;letter-spacing:1px;">DAY<br>STREAK</span></div>
+        </div>
+
+        <div style="margin-top:26px;">
+          <div style="font:600 13px/1 'Archivo';color:#D4FF00;letter-spacing:2px;">READY TO TRAIN</div>
+          <div style="font:800 56px/.92 'Archivo';color:#fff;letter-spacing:-1.5px;margin-top:10px;text-transform:uppercase;">Pull<br>Day B</div>
+          <div style="font:500 15px/1 'Archivo';color:#6B6B6B;margin-top:14px;letter-spacing:.5px;">6 EXERCISES · 22 SETS · ~50 MIN</div>
+        </div>
+
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:1px;background:#1a1a1a;border-radius:14px;overflow:hidden;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 16px;background:#0d0d0d;">
+            <span style="font:600 15px/1 'Archivo';color:#fff;">Deadlift</span><span style="font:500 13px/1 'JetBrains Mono';color:#6B6B6B;">3 × 5 · 140kg</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 16px;background:#0d0d0d;">
+            <span style="font:600 15px/1 'Archivo';color:#fff;">Barbell Row</span><span style="font:500 13px/1 'JetBrains Mono';color:#6B6B6B;">4 × 8 · 80kg</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 16px;background:#0d0d0d;">
+            <span style="font:600 15px/1 'Archivo';color:#fff;">Pull-ups</span><span style="font:500 13px/1 'JetBrains Mono';color:#6B6B6B;">4 × max</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <button style="width:100%;border:none;background:#D4FF00;color:#000;border-radius:16px;padding:20px;font:800 20px/1 'Archivo';letter-spacing:1px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 40px -8px rgba(212,255,0,.7);">▶ Start session</button>
+        </div>
+      </div>
+    </dc-import>
+
+    <!-- Voltage LOGGER -->
+    <dc-import name="IPhone" bg="#000000" chrome="#FFFFFF" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:56px 0 30px;display:flex;flex-direction:column;font-family:'Archivo',-apple-system;overflow:hidden;color:#fff;">
+        <div style="padding:0 22px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font:600 14px/1 'Archivo';color:#6B6B6B;">‹ PULL B</div>
+          <div style="font:600 12px/1 'Archivo';color:#6B6B6B;letter-spacing:1px;">02 / 06</div>
+        </div>
+        <div style="padding:14px 22px 0;">
+          <div style="font:600 13px/1 'Archivo';color:#D4FF00;letter-spacing:2px;">EXERCISE 2 · ROW</div>
+          <div style="font:800 30px/1 'Archivo';color:#fff;letter-spacing:-.5px;margin-top:6px;text-transform:uppercase;">Barbell Row</div>
+        </div>
+
+        <div style="display:flex;align-items:stretch;gap:0;margin-top:18px;flex:1;min-height:0;">
+          <!-- big number + sets -->
+          <div style="flex:1;padding:0 0 0 22px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <span style="font:800 88px/.85 'Archivo';color:#D4FF00;letter-spacing:-3px;font-variant-numeric:tabular-nums;">{{ voltage.wStr }}</span>
+              <span style="font:600 18px/1 'Archivo';color:#6B6B6B;">kg</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;margin-top:8px;">
+              <button onClick="{{ voltage.decR }}" style="width:42px;height:42px;border:1.5px solid #2a2a2a;border-radius:12px;background:#0d0d0d;color:#fff;font:300 24px/1 'Archivo';cursor:pointer;">−</button>
+              <div style="text-align:center;"><div style="font:800 30px/1 'Archivo';color:#fff;">{{ voltage.r }}</div><div style="font:600 10px/1 'Archivo';color:#6B6B6B;letter-spacing:2px;">REPS</div></div>
+              <button onClick="{{ voltage.incR }}" style="width:42px;height:42px;border:1.5px solid #2a2a2a;border-radius:12px;background:#0d0d0d;color:#fff;font:300 24px/1 'Archivo';cursor:pointer;">+</button>
+            </div>
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:7px;">
+              <sc-for list="{{ voltage.sets }}" as="set" hint-placeholder-count="1">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font:600 12px/1 'JetBrains Mono';color:#6B6B6B;width:16px;">{{ set.n }}</span>
+                  <span style="width:7px;height:7px;border-radius:50%;background:#D4FF00;"></span>
+                  <span style="font:600 15px/1 'Archivo';color:#fff;">{{ set.line }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:10px;opacity:.5;">
+                <span style="font:600 12px/1 'JetBrains Mono';color:#6B6B6B;width:16px;">{{ voltage.nextSet }}</span>
+                <span style="width:7px;height:7px;border-radius:50%;border:1.5px solid #6B6B6B;"></span>
+                <span style="font:500 14px/1 'Archivo';color:#6B6B6B;">target {{ voltage.ghostStr }}</span>
+              </div>
+            </div>
+          </div>
+          <!-- wheel -->
+          <div style="flex:none;width:96px;position:relative;">
+            <div style="position:absolute;left:6px;right:14px;top:92px;height:46px;border-radius:12px;background:rgba(212,255,0,.14);box-shadow:inset 0 0 0 1.5px rgba(212,255,0,.5);pointer-events:none;z-index:2;"></div>
+            <div ref="{{ voltageWheelRef }}" onScroll="{{ onVoltageScroll }}" style="height:230px;overflow-y:auto;scroll-snap-type:y mandatory;-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);">
+              <div style="height:92px;"></div>
+              <sc-for list="{{ voltage.opts }}" as="o" hint-placeholder-count="9">
+                <div style="height:46px;scroll-snap-align:center;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;font:600 22px/1 'JetBrains Mono';color:#8a8a8a;font-variant-numeric:tabular-nums;">{{ o.v }}</div>
+              </sc-for>
+              <div style="height:92px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 22px;">
+          <sc-if value="{{ voltage.restOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;border:1.5px solid rgba(212,255,0,.4);border-radius:14px;padding:12px 18px;margin-bottom:12px;">
+              <span style="font:600 12px/1 'Archivo';color:#D4FF00;letter-spacing:2px;animation:glowpulse 1s infinite;">RESTING</span>
+              <span style="font:700 28px/1 'JetBrains Mono';color:#fff;font-variant-numeric:tabular-nums;">{{ voltage.restStr }}</span>
+              <button onClick="{{ voltage.doSkip }}" style="border:none;background:#1a1a1a;color:#D4FF00;font:600 12px/1 'Archivo';letter-spacing:1px;border-radius:9px;padding:10px 14px;cursor:pointer;">SKIP</button>
+            </div>
+          </sc-if>
+          <button onClick="{{ voltage.doLog }}" style="width:100%;border:none;background:#D4FF00;color:#000;border-radius:14px;padding:19px;font:800 19px/1 'Archivo';letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 36px -10px rgba(212,255,0,.7);">Log set {{ voltage.nextSet }}</button>
+        </div>
+
+        <sc-if value="{{ voltage.flash }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:#D4FF00;animation:flashfade .65s ease-out;pointer-events:none;"></div></sc-if>
+        <sc-if value="{{ voltage.pbFire }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="background:#000;border:2px solid #D4FF00;border-radius:18px;padding:22px 30px;text-align:center;animation:pbpop .5s ease-out;box-shadow:0 0 60px -10px rgba(212,255,0,.8);"><div style="font:800 30px/1 'Archivo';color:#D4FF00;letter-spacing:1px;">NEW PB</div><div style="font:500 14px/1 'JetBrains Mono';color:#fff;margin-top:8px;">{{ voltage.wStr }} kg</div></div></div></sc-if>
+      </div>
+    </dc-import>
+  </section>
+
+  <!-- ===================== MAXED ===================== -->
+  <section data-screen-label="MAXED — Brutalist HUD" data-mx-root data-mx-theme="{{ maxedTheme }}" style="display:flex;gap:40px;align-items:flex-start;margin-bottom:64px;">
+    <div style="flex:none;width:296px;padding-top:10px;">
+      <div style="font:800 26px/1 -apple-system;color:#1d1b18;letter-spacing:-.5px;">MAXED</div>
+      <div style="font:italic 400 15px/1.4 'Spectral',serif;color:#6b655d;margin:8px 0 18px;">The number is the whole screen — a heads-up display for the rack.</div>
+      <div style="display:flex;gap:7px;margin-bottom:16px;">
+        <span style="width:26px;height:26px;border-radius:7px;background:#F4F4F0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#0B0B0B;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#FF2D00;"></span>
+      </div>
+      <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font:500 13px/1.4 -apple-system;color:#1d1b18;">
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">TYPE</dt><dd style="margin:0;">Anton display · mono labels</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">ENTRY</dt><dd style="margin:0;">Giant +/− steppers flanking the number</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">MODE</dt><dd style="margin:0;">Light / dark — tap ☾ in the top bar</dd>
+      </dl>
+      <p style="font:400 13.5px/1.55 -apple-system;color:#6b655d;margin:16px 0 0;">No chrome, no decoration — the weight fills half the phone so you read it mid-set without lifting the phone. Two enormous hit-zones, a stark numbered ledger, a full-width rest bar. Inverts to true-black for the dark gym.</p>
+    </div>
+
+    <!-- MAXED HOME -->
+    <dc-import name="IPhone" bg="var(--mx-bg)" chrome="var(--mx-ink)" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:60px 0 34px;display:flex;flex-direction:column;font-family:'Archivo',-apple-system;overflow:hidden;color:var(--mx-ink);">
+        <div style="padding:0 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--mx-ink);padding-bottom:14px;">
+          <span style="font:700 13px/1 'JetBrains Mono';letter-spacing:1px;">DAY 214</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font:700 13px/1 'JetBrains Mono';letter-spacing:1px;">STREAK 12🔥</span>
+            <button onClick="{{ toggleMaxed }}" aria-label="Toggle dark mode" style="width:34px;height:28px;border:2px solid var(--mx-ink);background:transparent;color:var(--mx-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <sc-if value="{{ maxedLight }}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></sc-if>
+              <sc-if value="{{ maxedDark }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="4.4"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2 2M17.4 17.4l2 2M19.4 4.6l-2 2M6.6 17.4l-2 2" stroke-linecap="round"/></svg></sc-if>
+            </button>
+          </div>
+        </div>
+        <div style="padding:24px 22px 0;">
+          <div style="font:700 13px/1 'JetBrains Mono';color:var(--mx-accent);letter-spacing:2px;">TODAY</div>
+          <div style="font:400 76px/.82 'Anton';text-transform:uppercase;letter-spacing:-1px;margin-top:12px;">Squat<br>Day</div>
+        </div>
+        <div style="margin-top:26px;border-top:2px solid var(--mx-ink);">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--mx-line);">
+            <span style="font:700 17px/1 'Archivo';">01 Back Squat</span><span style="font:700 14px/1 'JetBrains Mono';">5×5</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--mx-line);">
+            <span style="font:700 17px/1 'Archivo';">02 Romanian DL</span><span style="font:700 14px/1 'JetBrains Mono';">4×8</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--mx-line);">
+            <span style="font:700 17px/1 'Archivo';">03 Leg Press</span><span style="font:700 14px/1 'JetBrains Mono';">3×12</span>
+          </div>
+        </div>
+        <div style="margin-top:auto;padding:0 22px;">
+          <button style="width:100%;border:none;background:var(--mx-ink);color:var(--mx-bg);border-radius:0;padding:24px;font:400 30px/1 'Anton';letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">Start<span style="color:var(--mx-accent);">▶</span></button>
+        </div>
+      </div>
+    </dc-import>
+
+    <!-- MAXED LOGGER -->
+    <dc-import name="IPhone" bg="var(--mx-bg)" chrome="var(--mx-ink)" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:56px 0 30px;display:flex;flex-direction:column;font-family:'Archivo',-apple-system;overflow:hidden;color:var(--mx-ink);">
+        <div style="padding:0 22px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font:700 13px/1 'JetBrains Mono';letter-spacing:1px;">‹ 01 / 03</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font:700 13px/1 'JetBrains Mono';color:var(--mx-accent);letter-spacing:1px;">PB {{ maxed.pbStr }}</span>
+            <button onClick="{{ toggleMaxed }}" aria-label="Toggle dark mode" style="width:34px;height:28px;border:2px solid var(--mx-ink);background:transparent;color:var(--mx-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
+              <sc-if value="{{ maxedLight }}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></sc-if>
+              <sc-if value="{{ maxedDark }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="4.4"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2 2M17.4 17.4l2 2M19.4 4.6l-2 2M6.6 17.4l-2 2" stroke-linecap="round"/></svg></sc-if>
+            </button>
+          </div>
+        </div>
+        <div style="padding:8px 22px 0;">
+          <div style="font:400 34px/.9 'Anton';text-transform:uppercase;letter-spacing:-.5px;">Back Squat</div>
+        </div>
+
+        <!-- hero number -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-top:6px;">
+          <button onClick="{{ maxed.decW }}" style="width:74px;height:74px;border:3px solid var(--mx-ink);background:var(--mx-bg);color:var(--mx-ink);font:400 46px/1 'Anton';cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:0;">−</button>
+          <div style="text-align:center;flex:1;">
+            <div style="font:400 96px/.8 'Anton';letter-spacing:-3px;font-variant-numeric:tabular-nums;">{{ maxed.wStr }}</div>
+            <div style="font:700 13px/1 'JetBrains Mono';letter-spacing:3px;color:var(--mx-accent);margin-top:4px;">KILOS · +5</div>
+          </div>
+          <button onClick="{{ maxed.incW }}" style="width:74px;height:74px;border:3px solid var(--mx-ink);background:var(--mx-ink);color:var(--mx-bg);font:400 46px/1 'Anton';cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:0;">+</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;border-top:2px solid var(--mx-ink);border-bottom:2px solid var(--mx-ink);">
+          <button onClick="{{ maxed.decR }}" style="width:60px;padding:14px 0;border:none;border-right:2px solid var(--mx-ink);background:var(--mx-bg);color:var(--mx-ink);font:400 30px/1 'Anton';cursor:pointer;">−</button>
+          <div style="flex:1;text-align:center;padding:10px 0;"><span style="font:400 40px/1 'Anton';">{{ maxed.r }}</span><span style="font:700 12px/1 'JetBrains Mono';letter-spacing:2px;color:var(--mx-sub);"> REPS</span></div>
+          <button onClick="{{ maxed.incR }}" style="width:60px;padding:14px 0;border:none;border-left:2px solid var(--mx-ink);background:var(--mx-bg);color:var(--mx-ink);font:400 30px/1 'Anton';cursor:pointer;">+</button>
+        </div>
+
+        <!-- ledger -->
+        <div style="padding:12px 22px 0;flex:1;min-height:0;">
+          <sc-for list="{{ maxed.sets }}" as="set" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--mx-line);">
+              <span style="font:700 14px/1 'JetBrains Mono';color:var(--mx-sub);">SET {{ set.n }}</span>
+              <span style="font:400 26px/1 'Anton';">{{ set.w }}<span style="font:700 13px/1 'JetBrains Mono';color:var(--mx-sub);"> × {{ set.r }}</span></span>
+              <sc-if value="{{ set.pb }}" hint-placeholder-val="{{ false }}"><span style="font:700 11px/1 'JetBrains Mono';color:#fff;background:var(--mx-accent);padding:4px 6px;letter-spacing:1px;">PB</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:0 22px;">
+          <sc-if value="{{ maxed.restOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;background:var(--mx-ink);color:var(--mx-bg);margin-bottom:10px;">
+              <span style="flex:1;font:700 12px/1 'JetBrains Mono';letter-spacing:2px;padding:0 16px;">REST</span>
+              <span style="font:400 40px/1 'Anton';padding:10px 16px;font-variant-numeric:tabular-nums;">{{ maxed.restStr }}</span>
+              <button onClick="{{ maxed.doSkip }}" style="border:none;background:var(--mx-accent);color:#fff;font:700 13px/1 'JetBrains Mono';padding:0 18px;align-self:stretch;cursor:pointer;letter-spacing:1px;">SKIP</button>
+            </div>
+          </sc-if>
+          <button onClick="{{ maxed.doLog }}" style="width:100%;border:none;background:var(--mx-accent);color:#fff;padding:22px;font:400 28px/1 'Anton';letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Log set {{ maxed.nextSet }}</button>
+        </div>
+
+        <sc-if value="{{ maxed.flash }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:var(--mx-accent);animation:flashfade .6s ease-out;pointer-events:none;"></div></sc-if>
+        <sc-if value="{{ maxed.pbFire }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="background:var(--mx-accent);color:#fff;padding:24px 32px;animation:pbpop .5s ease-out;text-align:center;transform:rotate(-3deg);"><div style="font:400 44px/.9 'Anton';letter-spacing:1px;">NEW PB</div><div style="font:700 14px/1 'JetBrains Mono';margin-top:6px;">{{ maxed.wStr }} KG</div></div></div></sc-if>
+      </div>
+    </dc-import>
+  </section>
+
+  <!-- ===================== LEDGER ===================== -->
+  <section data-screen-label="Ledger — Warm editorial" style="display:flex;gap:40px;align-items:flex-start;margin-bottom:64px;">
+    <div style="flex:none;width:296px;padding-top:10px;">
+      <div style="font:800 26px/1 -apple-system;color:#1d1b18;letter-spacing:-.5px;">Ledger</div>
+      <div style="font:italic 400 15px/1.4 'Spectral',serif;color:#6b655d;margin:8px 0 18px;">Less clinical, more journal — training as a daily ritual.</div>
+      <div style="display:flex;gap:7px;margin-bottom:16px;">
+        <span style="width:26px;height:26px;border-radius:7px;background:#F5EFE6;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#EDE4D3;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#C8643C;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#7A8466;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#2B2622;"></span>
+      </div>
+      <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font:500 13px/1.4 -apple-system;color:#1d1b18;">
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">TYPE</dt><dd style="margin:0;">Spectral serif · warm sans data</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">ENTRY</dt><dd style="margin:0;">Soft clay +/− steppers, tap-to-type</dd>
+      </dl>
+      <p style="font:400 13.5px/1.55 -apple-system;color:#6b655d;margin:16px 0 0;">For someone who finds spreadsheets cold. A cream logbook page with ruled lines and a serif voice — your set history reads like handwriting, and a beaten PB gets a quiet, human &ldquo;new best.&rdquo;</p>
+    </div>
+
+    <!-- LEDGER HOME -->
+    <dc-import name="IPhone" bg="#F5EFE6" chrome="#2B2622" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:62px 24px 34px;display:flex;flex-direction:column;font-family:'Spectral',serif;overflow:hidden;color:#2B2622;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(43,38,34,.2);padding-bottom:12px;">
+          <div><div style="font:italic 400 15px/1 'Spectral';color:#7A8466;">Wednesday</div><div style="font:500 20px/1 'Spectral';margin-top:3px;">12 March</div></div>
+          <div style="text-align:right;"><div style="font:600 22px/1 'Spectral';color:#C8643C;">Week 3</div><div style="font:italic 400 13px/1 'Spectral';color:#7A8466;margin-top:2px;">day 2 of 4</div></div>
+        </div>
+
+        <div style="margin-top:22px;">
+          <div style="font:italic 400 16px/1 'Spectral';color:#7A8466;">Today&rsquo;s session</div>
+          <div style="font:500 38px/1.05 'Spectral';margin-top:6px;letter-spacing:-.5px;">Bench &amp; Press</div>
+        </div>
+
+        <div style="margin-top:20px;background:#FBF7F0;border-radius:4px;padding:18px 20px;box-shadow:0 1px 2px rgba(43,38,34,.08);">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dotted rgba(43,38,34,.25);"><span style="font:500 17px/1 'Spectral';">Bench Press</span><span style="font:italic 400 14px/1 'Spectral';color:#7A8466;">3 sets · 8 reps</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dotted rgba(43,38,34,.25);"><span style="font:500 17px/1 'Spectral';">Overhead Press</span><span style="font:italic 400 14px/1 'Spectral';color:#7A8466;">4 sets · 6 reps</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;"><span style="font:500 17px/1 'Spectral';">Lateral Raise</span><span style="font:italic 400 14px/1 'Spectral';color:#7A8466;">3 sets · 15 reps</span></div>
+        </div>
+
+        <div style="margin-top:18px;">
+          <div style="font:italic 400 14px/1 'Spectral';color:#7A8466;margin-bottom:8px;">Last time out</div>
+          <div style="font:400 15px/1.5 'Spectral';color:#2B2622;">Monday — pull day. Eighteen good sets, and a new best on the row at <span style="color:#C8643C;font-weight:600;">82.5 kg.</span> Felt strong.</div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <button style="width:100%;border:none;background:#C8643C;color:#FBF7F0;border-radius:6px;padding:18px;font:500 19px/1 'Spectral';letter-spacing:.3px;cursor:pointer;box-shadow:0 6px 16px -6px rgba(200,100,60,.5);">Begin today&rsquo;s session →</button>
+        </div>
+      </div>
+    </dc-import>
+
+    <!-- LEDGER LOGGER -->
+    <dc-import name="IPhone" bg="#F5EFE6" chrome="#2B2622" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:58px 24px 30px;display:flex;flex-direction:column;font-family:'Spectral',serif;overflow:hidden;color:#2B2622;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font:italic 400 15px/1 'Spectral';color:#7A8466;">‹ back to session</span>
+          <span style="font:400 13px/1 'Spectral';color:#7A8466;">first of three</span>
+        </div>
+        <div style="margin-top:12px;border-bottom:1px solid rgba(43,38,34,.2);padding-bottom:12px;">
+          <div style="font:500 32px/1 'Spectral';letter-spacing:-.5px;">Bench Press</div>
+          <div style="font:italic 400 14px/1 'Spectral';color:#7A8466;margin-top:6px;">last 42.5 × 10 &nbsp;·&nbsp; best <span style="color:#C8643C;">{{ ledger.pbStr }} kg</span></div>
+        </div>
+
+        <div style="margin-top:14px;display:flex;flex-direction:column;">
+          <sc-for list="{{ ledger.sets }}" as="set" hint-placeholder-count="1">
+            <div style="display:flex;align-items:baseline;gap:14px;padding:11px 0;border-bottom:1px dotted rgba(43,38,34,.28);">
+              <span style="font:italic 400 14px/1 'Spectral';color:#7A8466;width:54px;">set {{ set.n }}</span>
+              <span style="font:500 22px/1 'Spectral';">{{ set.w }} <span style="font:italic 400 15px/1 'Spectral';color:#7A8466;">kg ×</span> {{ set.r }}</span>
+              <sc-if value="{{ set.pb }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font:italic 500 13px/1 'Spectral';color:#C8643C;">new best ✓</span></sc-if>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:baseline;gap:14px;padding:11px 0;border-bottom:1px dotted rgba(43,38,34,.28);opacity:.55;">
+            <span style="font:italic 400 14px/1 'Spectral';color:#7A8466;width:54px;">set {{ ledger.nextSet }}</span>
+            <span style="font:italic 400 16px/1 'Spectral';color:#7A8466;">aiming for {{ ledger.ghostStr }}</span>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <sc-if value="{{ ledger.restOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#EDE4D3;border-radius:6px;padding:12px 18px;margin-bottom:12px;">
+              <span style="font:italic 400 15px/1 'Spectral';color:#7A8466;">resting…</span>
+              <span style="font:500 26px/1 'Spectral';color:#2B2622;font-variant-numeric:tabular-nums;">{{ ledger.restStr }}</span>
+              <button onClick="{{ ledger.doSkip }}" style="border:none;background:transparent;color:#C8643C;font:500 15px/1 'Spectral';cursor:pointer;">skip →</button>
+            </div>
+          </sc-if>
+
+          <div style="background:#FBF7F0;border-radius:6px;padding:16px;box-shadow:0 1px 2px rgba(43,38,34,.08);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <button onClick="{{ ledger.decW }}" style="width:54px;height:54px;border:1.5px solid #C8643C;border-radius:50%;background:transparent;color:#C8643C;font:300 28px/1 'Spectral';cursor:pointer;">−</button>
+              <div style="text-align:center;"><div style="font:500 44px/1 'Spectral';letter-spacing:-1px;">{{ ledger.wStr }}</div><div style="font:italic 400 13px/1 'Spectral';color:#7A8466;">kilograms · 2.5</div></div>
+              <button onClick="{{ ledger.incW }}" style="width:54px;height:54px;border:none;border-radius:50%;background:#C8643C;color:#FBF7F0;font:300 28px/1 'Spectral';cursor:pointer;">+</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px;padding-top:14px;border-top:1px dotted rgba(43,38,34,.25);">
+              <button onClick="{{ ledger.decR }}" style="width:36px;height:36px;border:1.5px solid rgba(43,38,34,.3);border-radius:50%;background:transparent;color:#2B2622;font:300 20px/1 'Spectral';cursor:pointer;">−</button>
+              <div style="text-align:center;"><span style="font:500 24px/1 'Spectral';">{{ ledger.r }}</span> <span style="font:italic 400 14px/1 'Spectral';color:#7A8466;">reps</span></div>
+              <button onClick="{{ ledger.incR }}" style="width:36px;height:36px;border:1.5px solid rgba(43,38,34,.3);border-radius:50%;background:transparent;color:#2B2622;font:300 20px/1 'Spectral';cursor:pointer;">+</button>
+            </div>
+          </div>
+          <button onClick="{{ ledger.doLog }}" style="width:100%;border:none;background:#2B2622;color:#F5EFE6;border-radius:6px;padding:16px;font:500 18px/1 'Spectral';margin-top:12px;cursor:pointer;">Record set {{ ledger.nextSet }}</button>
+        </div>
+
+        <sc-if value="{{ ledger.flash }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:#C8643C;animation:flashfade .65s ease-out;pointer-events:none;"></div></sc-if>
+        <sc-if value="{{ ledger.pbFire }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);background:#FBF7F0;border:2px solid #C8643C;border-radius:8px;padding:20px 28px;text-align:center;animation:pbpop .5s ease-out;box-shadow:0 14px 34px -10px rgba(43,38,34,.4);"><div style="font:italic 600 26px/1 'Spectral';color:#C8643C;">A new best.</div><div style="font:400 15px/1 'Spectral';color:#2B2622;margin-top:8px;">{{ ledger.wStr }} kg — well done.</div></div></sc-if>
+      </div>
+    </dc-import>
+  </section>
+
+  <!-- ===================== SPLITS ===================== -->
+  <section data-screen-label="Splits — Pro-athlete data" style="display:flex;gap:40px;align-items:flex-start;margin-bottom:24px;">
+    <div style="flex:none;width:296px;padding-top:10px;">
+      <div style="font:800 26px/1 -apple-system;color:#1d1b18;letter-spacing:-.5px;">Splits</div>
+      <div style="font:italic 400 15px/1.4 'Spectral',serif;color:#6b655d;margin:8px 0 18px;">Stat-line energy — every number charted and ranked.</div>
+      <div style="display:flex;gap:7px;margin-bottom:16px;">
+        <span style="width:26px;height:26px;border-radius:7px;background:#0E1116;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#161B22;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#3DDC84;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#FF6A1A;"></span>
+        <span style="width:26px;height:26px;border-radius:7px;background:#E6EDF3;"></span>
+      </div>
+      <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font:500 13px/1.4 -apple-system;color:#1d1b18;">
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">TYPE</dt><dd style="margin:0;">Space Grotesk · JetBrains Mono figures</dd>
+        <dt style="font:700 11px/1.4 'JetBrains Mono',monospace;color:#9a948c;letter-spacing:1px;">ENTRY</dt><dd style="margin:0;">Compact wheel + live Δ vs last session</dd>
+      </dl>
+      <p style="font:400 13.5px/1.55 -apple-system;color:#6b655d;margin:16px 0 0;">For the lifter who loves the numbers. Volume, estimated 1RM and a column-aligned set table sit one tap away; the wheel shows your delta against last week in real time so progressive overload is literally on screen.</p>
+    </div>
+
+    <!-- SPLITS HOME -->
+    <dc-import name="IPhone" bg="#0E1116" chrome="#E6EDF3" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:60px 18px 34px;display:flex;flex-direction:column;font-family:'Space Grotesk',-apple-system;overflow:hidden;color:#E6EDF3;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font:600 19px/1 'Space Grotesk';">Dashboard</div>
+          <div style="font:500 12px/1 'JetBrains Mono';color:#7D8590;">WED 12 MAR</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;">
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:12px;padding:12px;"><div style="font:500 10px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;">STREAK</div><div style="font:700 24px/1 'Space Grotesk';margin-top:7px;">12<span style="font:500 12px/1 'JetBrains Mono';color:#7D8590;">d</span></div></div>
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:12px;padding:12px;"><div style="font:500 10px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;">VOLUME</div><div style="font:700 24px/1 'Space Grotesk';margin-top:7px;color:#3DDC84;">14.2<span style="font:500 12px/1 'JetBrains Mono';color:#7D8590;">t</span></div></div>
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:12px;padding:12px;"><div style="font:500 10px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;">PBs/MO</div><div style="font:700 24px/1 'Space Grotesk';margin-top:7px;color:#FF6A1A;">5</div></div>
+        </div>
+
+        <div style="margin-top:12px;background:#161B22;border:1px solid #21262D;border-radius:14px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font:500 11px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;">EST 1RM · BENCH</span><span style="font:500 11px/1 'JetBrains Mono';color:#3DDC84;">▲ 4.2%</span></div>
+          <div style="display:flex;align-items:flex-end;gap:5px;height:54px;margin-top:12px;">
+            <div style="flex:1;height:48%;background:#21262D;border-radius:2px;"></div>
+            <div style="flex:1;height:55%;background:#21262D;border-radius:2px;"></div>
+            <div style="flex:1;height:52%;background:#21262D;border-radius:2px;"></div>
+            <div style="flex:1;height:68%;background:#21262D;border-radius:2px;"></div>
+            <div style="flex:1;height:64%;background:#2D6A4A;border-radius:2px;"></div>
+            <div style="flex:1;height:80%;background:#2D6A4A;border-radius:2px;"></div>
+            <div style="flex:1;height:100%;background:#3DDC84;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;background:#161B22;border:1px solid #21262D;border-radius:14px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font:500 11px/1 'JetBrains Mono';color:#3DDC84;letter-spacing:1px;">QUEUED</div><div style="font:600 20px/1 'Space Grotesk';margin-top:6px;">Push A · Hypertrophy</div></div><div style="font:500 12px/1 'JetBrains Mono';color:#7D8590;text-align:right;">6 lifts<br>22 sets</div></div>
+        </div>
+
+        <div style="margin-top:auto;">
+          <button style="width:100%;border:none;background:#3DDC84;color:#0E1116;border-radius:14px;padding:18px;font:700 17px/1 'Space Grotesk';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">▶ Start &amp; track</button>
+        </div>
+      </div>
+    </dc-import>
+
+    <!-- SPLITS LOGGER -->
+    <dc-import name="IPhone" bg="#0E1116" chrome="#E6EDF3" time="9:41" hint-size="417px,876px">
+      <div style="position:absolute;inset:0;padding:56px 0 30px;display:flex;flex-direction:column;font-family:'Space Grotesk',-apple-system;overflow:hidden;color:#E6EDF3;">
+        <div style="padding:0 18px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font:500 13px/1 'JetBrains Mono';color:#7D8590;">‹ PUSH A</span>
+          <span style="font:500 12px/1 'JetBrains Mono';color:#7D8590;">02/06</span>
+        </div>
+        <div style="padding:10px 18px 0;display:flex;justify-content:space-between;align-items:flex-end;">
+          <div style="font:600 23px/1 'Space Grotesk';">Bench Press</div>
+          <div style="font:500 11px/1 'JetBrains Mono';color:#7D8590;text-align:right;">e1RM <b style="color:#E6EDF3;">{{ splits.e1rm }}</b></div>
+        </div>
+
+        <!-- stat chips -->
+        <div style="padding:12px 18px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;">
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:9px;padding:9px 10px;"><div style="font:500 9px/1 'JetBrains Mono';color:#7D8590;letter-spacing:.5px;">VOLUME</div><div style="font:600 16px/1 'Space Grotesk';margin-top:5px;font-variant-numeric:tabular-nums;">{{ splits.vol }}<span style="font:500 9px/1 'JetBrains Mono';color:#7D8590;">kg</span></div></div>
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:9px;padding:9px 10px;"><div style="font:500 9px/1 'JetBrains Mono';color:#7D8590;letter-spacing:.5px;">PB</div><div style="font:600 16px/1 'Space Grotesk';margin-top:5px;color:#FF6A1A;">{{ splits.pbStr }}</div></div>
+          <div style="background:#161B22;border:1px solid #21262D;border-radius:9px;padding:9px 10px;"><div style="font:500 9px/1 'JetBrains Mono';color:#7D8590;letter-spacing:.5px;">LAST</div><div style="font:600 16px/1 'Space Grotesk';margin-top:5px;">{{ splits.lastStr }}</div></div>
+        </div>
+
+        <!-- set table -->
+        <div style="padding:12px 18px 0;flex:1;min-height:0;">
+          <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 28px;gap:4px;font:500 9px/1 'JetBrains Mono';color:#7D8590;letter-spacing:.5px;padding-bottom:7px;border-bottom:1px solid #21262D;">
+            <span>SET</span><span style="text-align:right;">KG</span><span style="text-align:right;">REPS</span><span style="text-align:right;">e1RM</span><span></span>
+          </div>
+          <sc-for list="{{ splits.sets }}" as="set" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 28px;gap:4px;align-items:center;font:500 15px/1 'JetBrains Mono';font-variant-numeric:tabular-nums;padding:9px 0;border-bottom:1px solid #161B22;">
+              <span style="color:#7D8590;font-size:12px;">{{ set.n }}</span>
+              <span style="text-align:right;">{{ set.w }}</span>
+              <span style="text-align:right;">{{ set.r }}</span>
+              <span style="text-align:right;color:#7D8590;">{{ set.e1rm }}</span>
+              <span style="text-align:right;"><sc-if value="{{ set.pb }}" hint-placeholder-val="{{ false }}"><span style="color:#FF6A1A;font-size:13px;">★</span></sc-if></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- entry: wheel + reps + delta -->
+        <div style="padding:0 18px;display:flex;align-items:stretch;gap:10px;">
+          <div style="flex:none;width:84px;position:relative;background:#161B22;border:1px solid #21262D;border-radius:12px;overflow:hidden;">
+            <div style="position:absolute;left:5px;right:5px;top:46px;height:46px;border-radius:8px;background:rgba(61,220,132,.12);box-shadow:inset 0 0 0 1px rgba(61,220,132,.45);pointer-events:none;z-index:2;"></div>
+            <div ref="{{ splitsWheelRef }}" onScroll="{{ onSplitsScroll }}" style="height:138px;overflow-y:auto;scroll-snap-type:y mandatory;-webkit-mask-image:linear-gradient(transparent,#000 33%,#000 67%,transparent);mask-image:linear-gradient(transparent,#000 33%,#000 67%,transparent);">
+              <div style="height:46px;"></div>
+              <sc-for list="{{ splits.opts }}" as="o" hint-placeholder-count="5">
+                <div style="height:46px;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font:600 19px/1 'JetBrains Mono';color:#9aa3ad;font-variant-numeric:tabular-nums;">{{ o.v }}</div>
+              </sc-for>
+              <div style="height:46px;"></div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="background:#161B22;border:1px solid #21262D;border-radius:12px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font:500 10px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;">KG · Δ LAST</span>
+              <span style="font:600 13px/1 'JetBrains Mono';color:#3DDC84;"><sc-if value="{{ splits.deltaUp }}" hint-placeholder-val="{{ true }}">{{ splits.deltaStr }} ▲</sc-if></span>
+            </div>
+            <div style="background:#161B22;border:1px solid #21262D;border-radius:12px;padding:8px 0;display:flex;align-items:center;justify-content:space-between;">
+              <button onClick="{{ splits.decR }}" style="width:40px;height:38px;border:none;background:transparent;color:#E6EDF3;font:300 22px/1 'Space Grotesk';cursor:pointer;">−</button>
+              <div style="text-align:center;"><span style="font:600 22px/1 'JetBrains Mono';">{{ splits.r }}</span><span style="font:500 9px/1 'JetBrains Mono';color:#7D8590;letter-spacing:1px;"> REPS</span></div>
+              <button onClick="{{ splits.incR }}" style="width:40px;height:38px;border:none;background:transparent;color:#E6EDF3;font:300 22px/1 'Space Grotesk';cursor:pointer;">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:10px 18px 0;">
+          <sc-if value="{{ splits.restOn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#161B22;border:1px solid #21262D;border-radius:11px;padding:9px 14px;margin-bottom:9px;">
+              <span style="font:500 10px/1 'JetBrains Mono';color:#FF6A1A;letter-spacing:1px;">REST</span>
+              <span style="font:600 20px/1 'JetBrains Mono';font-variant-numeric:tabular-nums;">{{ splits.restStr }}</span>
+              <button onClick="{{ splits.doSkip }}" style="border:none;background:#21262D;color:#E6EDF3;font:500 11px/1 'JetBrains Mono';border-radius:7px;padding:8px 12px;cursor:pointer;">SKIP</button>
+            </div>
+          </sc-if>
+          <button onClick="{{ splits.doLog }}" style="width:100%;border:none;background:#3DDC84;color:#0E1116;border-radius:12px;padding:16px;font:700 16px/1 'Space Grotesk';cursor:pointer;">Log set {{ splits.nextSet }} →</button>
+        </div>
+
+        <sc-if value="{{ splits.flash }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:#3DDC84;animation:flashfade .6s ease-out;pointer-events:none;"></div></sc-if>
+        <sc-if value="{{ splits.pbFire }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:#161B22;border:1.5px solid #FF6A1A;border-radius:14px;padding:18px 26px;text-align:center;animation:pbpop .5s ease-out;box-shadow:0 14px 34px -8px rgba(255,106,26,.4);"><div style="font:700 22px/1 'Space Grotesk';color:#FF6A1A;">NEW PB ★</div><div style="font:500 13px/1 'JetBrains Mono';color:#E6EDF3;margin-top:8px;">{{ splits.wStr }}kg · e1RM {{ splits.e1rm }}</div></div></sc-if>
+      </div>
+    </dc-import>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.WH = 46; this.WMIN = 40; this.WSTEP = 2.5;
+    this.wheelNodes = {};
+    this.makeWheelRef = (id) => (node) => {
+      this.wheelNodes[id] = node;
+      if(node && !node._inited){
+        node._inited = true;
+        const v = this.state.dirs[id].w;
+        const set = () => { node.scrollTop = Math.round((v-this.WMIN)/this.WSTEP)*this.WH; };
+        set(); requestAnimationFrame(set); setTimeout(set,80);
+      }
+    };
+  }
+  state = {
+    maxedDark: false,
+    dirs: {
+      aurora:  {w:60,   r:8,  inc:2.5, pb:60,    last:{w:57.5,r:8},  sets:[{w:55,r:10},{w:57.5,r:8}],        rest:0, restOn:false, flash:false, pbFire:false},
+      voltage: {w:100,  r:5,  inc:2.5, pb:102.5, last:{w:100,r:5},   sets:[{w:100,r:5}],                     rest:0, restOn:false, flash:false, pbFire:false},
+      maxed:   {w:140,  r:3,  inc:5,   pb:140,   last:{w:135,r:3},   sets:[{w:130,r:5},{w:135,r:3}],         rest:0, restOn:false, flash:false, pbFire:false},
+      ledger:  {w:42.5, r:10, inc:2.5, pb:45,    last:{w:42.5,r:10}, sets:[{w:40,r:12}],                     rest:0, restOn:false, flash:false, pbFire:false},
+      splits:  {w:80,   r:6,  inc:2.5, pb:82.5,  last:{w:80,r:6},    sets:[{w:77.5,r:6},{w:80,r:6}],         rest:0, restOn:false, flash:false, pbFire:false},
+    }
+  };
+  componentDidMount(){
+    this._t = setInterval(()=>{
+      this.setState(s=>{
+        let ch=false; const d={...s.dirs};
+        for(const k in d){ if(d[k].restOn && d[k].rest>0){ const nr=d[k].rest-1; d[k]={...d[k],rest:nr,restOn:nr>0}; ch=true; } }
+        return ch?{dirs:d}:null;
+      });
+    },1000);
+  }
+  componentWillUnmount(){ clearInterval(this._t); }
+  setD(id,patch){ this.setState(s=>({dirs:{...s.dirs,[id]:{...s.dirs[id],...patch}}})); }
+  adj(id,f,delta){
+    const c=this.state.dirs[id]; let v=c[f]+delta;
+    if(f==='w') v=Math.max(0,Math.round(v*4)/4);
+    if(f==='r') v=Math.max(1,Math.round(v));
+    this.setD(id,{[f]:v});
+  }
+  onWheel(id,e){
+    const i=Math.round(e.target.scrollTop/this.WH);
+    let v=this.WMIN+i*this.WSTEP; v=Math.max(this.WMIN,v);
+    if(v!==this.state.dirs[id].w) this.setD(id,{w:v});
+  }
+  log(id){
+    const c=this.state.dirs[id]; const beat=c.w>c.pb;
+    this.setD(id,{ sets:[...c.sets,{w:c.w,r:c.r,pb:beat}], pb:beat?c.w:c.pb, pbFire:beat, flash:true, rest:90, restOn:true });
+    setTimeout(()=>this.setD(id,{flash:false}),650);
+    if(beat) setTimeout(()=>this.setD(id,{pbFire:false}),2400);
+  }
+  fmt(s){ const m=Math.floor(s/60), ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
+  num(v){ return Number.isInteger(v)?String(v):(Math.round(v*10)/10).toFixed(1); }
+  renderVals(){
+    const out={};
+    const mk=(id,opts)=>{
+      const x=this.state.dirs[id];
+      const vol=x.sets.reduce((a,b)=>a+b.w*b.r,0);
+      const e1rm=Math.round(x.w*(1+x.r/30));
+      const beat=x.w>x.pb;
+      const delta=x.w-x.last.w;
+      out[id]={
+        ...x,
+        wStr:this.num(x.w), pbStr:this.num(x.pb),
+        lastStr:this.num(x.last.w)+'×'+x.last.r,
+        ghostStr:this.num(x.last.w)+' × '+x.last.r,
+        restStr:this.fmt(x.rest), vol, e1rm, beat,
+        deltaStr:(delta>0?'+':'')+this.num(delta), deltaUp:delta>0,
+        nextSet:x.sets.length+1,
+        sets:x.sets.map((st,i)=>({n:i+1, w:this.num(st.w), r:st.r, line:this.num(st.w)+' × '+st.r, pb:!!st.pb, e1rm:Math.round(st.w*(1+st.r/30))})),
+        incW:()=>this.adj(id,'w',this.state.dirs[id].inc),
+        decW:()=>this.adj(id,'w',-this.state.dirs[id].inc),
+        incR:()=>this.adj(id,'r',1),
+        decR:()=>this.adj(id,'r',-1),
+        doLog:()=>this.log(id),
+        doSkip:()=>this.setD(id,{rest:0,restOn:false}),
+      };
+      if(opts){ const arr=[]; for(let v=this.WMIN; v<=opts.max; v+=this.WSTEP){ arr.push({v:this.num(v),raw:v}); } out[id].opts=arr; }
+    };
+    mk('aurora'); mk('voltage',{max:200}); mk('maxed'); mk('ledger'); mk('splits',{max:160});
+    out.maxedDark = this.state.maxedDark;
+    out.maxedLight = !this.state.maxedDark;
+    out.maxedTheme = this.state.maxedDark ? 'dark' : 'light';
+    out.toggleMaxed = () => this.setState(s=>({maxedDark:!s.maxedDark}));
+    out.voltageWheelRef=this.makeWheelRef('voltage');
+    out.splitsWheelRef=this.makeWheelRef('splits');
+    out.onVoltageScroll=e=>this.onWheel('voltage',e);
+    out.onSplitsScroll=e=>this.onWheel('splits',e);
+    return out;
+  }
+}
+</script>
+</body>
+</html>
