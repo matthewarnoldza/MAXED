@@ -12,6 +12,7 @@ import { SetLogger } from "@/components/screens/SetLogger";
 import { History } from "@/components/screens/History";
 import { Settings } from "@/components/screens/Settings";
 import { SessionLog } from "@/components/screens/SessionLog";
+import { Achievements } from "@/components/screens/Achievements";
 import { useApp, cloudData, cacheUser, cloudPost, type ScreenId } from "@/store/useApp";
 
 const SCREENS: Record<ScreenId, React.ComponentType> = {
@@ -24,6 +25,7 @@ const SCREENS: Record<ScreenId, React.ComponentType> = {
   logger: SetLogger,
   history: History,
   sessions: SessionLog,
+  achievements: Achievements,
   settings: Settings,
 };
 
@@ -106,7 +108,7 @@ function SyncPill({ loading }: { loading: boolean }) {
     <div
       style={{
         position: "absolute",
-        top: 54,
+        top: "calc(env(safe-area-inset-top, 0px) + 8px)",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 70,

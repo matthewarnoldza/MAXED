@@ -29,7 +29,7 @@ export function Login() {
       style={{
         position: "absolute",
         inset: 0,
-        padding: "70px 28px 40px",
+        padding: "calc(env(safe-area-inset-top, 0px) + 40px) 28px calc(env(safe-area-inset-bottom, 0px) + 30px)",
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT.archivo,

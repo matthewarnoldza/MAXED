@@ -5,19 +5,13 @@ import { MoonIcon, SunIcon } from "@/components/ui/icons";
 import { useApp } from "@/store/useApp";
 
 /** Standard screen body: fills the phone, clears status bar + home indicator. */
-export function ScreenBody({
-  children,
-  topPad = 58,
-}: {
-  children: React.ReactNode;
-  topPad?: number;
-}) {
+export function ScreenBody({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
         position: "absolute",
         inset: 0,
-        padding: `${topPad}px 0 32px`,
+        padding: "calc(env(safe-area-inset-top, 0px) + 14px) 0 calc(env(safe-area-inset-bottom, 0px) + 18px)",
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT.archivo,

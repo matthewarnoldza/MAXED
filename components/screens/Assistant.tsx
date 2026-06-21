@@ -27,6 +27,7 @@ export function Assistant() {
   const reset = useApp((s) => s.resetAssistant);
 
   const [draft, setDraft] = useState("");
+  const [marked, setMarked] = useState<string[]>([]);
   const loading = a.status === "loading";
 
   // Re-opening the coach after accept/discard should land on a fresh prompt,
@@ -42,9 +43,26 @@ export function Assistant() {
   const bannedCount = Object.values(stances).filter((v) => v === "banned").length;
   const last = sessions[0];
 
+  const toggleMark = (name: string) =>
+    setMarked((m) => (m.includes(name) ? m.filter((n) => n !== name) : [...m, name]));
+
   const submit = () => {
-    if (draft.trim() && !loading) generate(draft.trim());
+    if (loading) return;
+    const note = draft.trim();
+    if (plan && marked.length) {
+      // targeted edit — swap only the marked lifts, keep the rest (draft carries the plan)
+      const what = note ? `: ${note}` : " with a good alternative";
+      generate(`Keep the rest of the workout the same, but replace ${marked.join(", ")}${what}.`);
+      setMarked([]);
+      setDraft("");
+      return;
+    }
+    if (note) {
+      generate(note);
+      setDraft("");
+    }
   };
+  const canSubmit = !loading && (draft.trim().length > 0 || (!!plan && marked.length > 0));
 
   return (
     <ScreenBody>
@@ -100,18 +118,44 @@ export function Assistant() {
               <div style={{ font: `700 10px/1 ${FONT.mono}`, letterSpacing: 1.5, color: T.sub }}>YOU ASKED</div>
               <div style={{ font: `700 14px/1.4 ${FONT.archivo}`, marginTop: 7 }}>“{a.prompt}”</div>
             </div>
+            <div style={{ font: `700 9px/1 ${FONT.mono}`, letterSpacing: 1, color: T.sub, marginBottom: 6 }}>
+              TAP A LIFT TO MARK IT FOR A SWAP, THEN SAY WHAT INSTEAD
+            </div>
             {plan.lifts.map((l, i) => {
               const isProg = l.load.trim().startsWith("+");
+              const mk = marked.includes(l.name);
               return (
-                <div key={i} style={{ padding: "11px 0", borderBottom: `1px solid ${T.line}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span style={{ font: `700 15px/1 ${FONT.archivo}` }}>{l.name}</span>
-                    <span style={{ font: `700 12px/1 ${FONT.mono}`, color: T.sub }}>
-                      {l.sets}×{l.reps} · <span style={{ color: isProg ? T.accent : T.sub }}>{l.load}</span>
+                <button
+                  key={i}
+                  onClick={() => toggleMark(l.name)}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    textAlign: "left",
+                    border: "none",
+                    borderBottom: `1px solid ${T.line}`,
+                    background: mk ? "var(--mx-soft)" : "transparent",
+                    color: T.ink,
+                    padding: "11px 8px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ font: `700 15px/1 ${FONT.archivo}`, textDecoration: mk ? "line-through" : "none", color: mk ? T.sub : T.ink }}>
+                      {l.name}
+                    </span>
+                    <span style={{ font: `700 12px/1 ${FONT.mono}`, color: T.sub, whiteSpace: "nowrap" }}>
+                      {mk ? (
+                        <span style={{ color: T.accent }}>↻ CHANGE</span>
+                      ) : (
+                        <>
+                          {l.sets}×{l.reps} · <span style={{ color: isProg ? T.accent : T.sub }}>{l.load}</span>
+                        </>
+                      )}
                     </span>
                   </div>
-                  {l.note && <div style={{ font: `700 10px/1.4 ${FONT.mono}`, color: T.accent, marginTop: 5, letterSpacing: 0.5 }}>↳ {l.note}</div>}
-                </div>
+                  {l.note && !mk && <div style={{ font: `700 10px/1.4 ${FONT.mono}`, color: T.accent, marginTop: 5, letterSpacing: 0.5 }}>↳ {l.note}</div>}
+                </button>
               );
             })}
           </>
@@ -149,15 +193,21 @@ export function Assistant() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
-            placeholder={plan ? "REFINE: e.g. swap lift 2 for a cable move" : "DESCRIBE YOUR WORKOUT…"}
+            placeholder={
+              marked.length
+                ? `WHAT INSTEAD OF ${marked.length} LIFT${marked.length > 1 ? "S" : ""}? (OPTIONAL)`
+                : plan
+                ? "REFINE: e.g. give me an extra leg set"
+                : "DESCRIBE YOUR WORKOUT…"
+            }
             style={{ border: "none", background: "transparent", outline: "none", font: `700 12px/1.3 ${FONT.mono}`, letterSpacing: 0.5, color: T.ink, width: "100%" }}
           />
           <button
             onClick={submit}
-            disabled={loading || !draft.trim()}
-            style={{ flex: "none", border: "none", background: draft.trim() ? T.ink : T.line, color: T.bg, font: `700 11px/1 ${FONT.mono}`, letterSpacing: 1, padding: "9px 11px", cursor: loading || !draft.trim() ? "default" : "pointer" }}
+            disabled={!canSubmit}
+            style={{ flex: "none", border: "none", background: canSubmit ? (marked.length ? T.accent : T.ink) : T.line, color: marked.length ? "#fff" : T.bg, font: `700 11px/1 ${FONT.mono}`, letterSpacing: 1, padding: "9px 11px", cursor: canSubmit ? "pointer" : "default" }}
           >
-            {loading ? "···" : plan ? "REFINE" : "SEND"}
+            {loading ? "···" : marked.length ? "SWAP" : plan ? "REFINE" : "SEND"}
           </button>
         </div>
       </div>

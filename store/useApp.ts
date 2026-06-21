@@ -28,6 +28,7 @@ export type ScreenId =
   | "logger"
   | "history"
   | "sessions"
+  | "achievements"
   | "settings";
 
 export type Theme = "light" | "dark";
@@ -77,6 +78,7 @@ interface AppState {
   live: LiveState;
   historyExercise: string;
   customExercises: { name: string; group: string }[];
+  pinned: string[];
 
   library: { query: string; category: Filter };
   apiKey: string;
@@ -110,6 +112,9 @@ interface AppState {
   incR: () => void;
   decR: () => void;
   cycleInc: () => void;
+  liveSwapLift: (name: string) => void;
+  liveAddLift: (name: string) => void;
+  liveRemoveLift: () => void;
   logSet: () => void;
   skipRest: () => void;
   tickRest: () => void;
@@ -121,10 +126,12 @@ interface AppState {
   addToPlan: (name: string) => void;
   togglePlan: (name: string) => void;
   addCustomExercise: (name: string) => void;
+  registerCustomExercise: (name: string) => void;
 
   // sessions / reuse
   repeatSession: (id: number) => void;
   deleteSession: (id: number) => void;
+  togglePin: (name: string) => void;
 
   // library
   setQuery: (q: string) => void;
@@ -174,7 +181,7 @@ function emptyLive(): LiveState {
     entries: {},
     w: 60,
     r: 8,
-    inc: 5,
+    inc: 2.5,
     rest: 0,
     restOn: false,
     restEndsAt: 0,
@@ -194,6 +201,7 @@ function freshUserData() {
     planFocus: "HYPERTROPHY",
     plan: DEFAULT_PLAN,
     customExercises: [] as { name: string; group: string }[],
+    pinned: ["Barbell Bench Press", "Back Squat", "Deadlift"] as string[],
   };
 }
 
@@ -208,6 +216,7 @@ function applyUserData(d: Record<string, unknown>): Partial<AppState> {
     planFocus: typeof d.planFocus === "string" ? d.planFocus : "HYPERTROPHY",
     plan: Array.isArray(d.plan) && d.plan.length ? (d.plan as PlanLift[]) : DEFAULT_PLAN,
     customExercises: Array.isArray(d.customExercises) ? (d.customExercises as { name: string; group: string }[]) : [],
+    pinned: Array.isArray(d.pinned) ? (d.pinned as string[]) : ["Barbell Bench Press", "Back Squat", "Deadlift"],
   };
   if (d.live && typeof d.live === "object") out.live = d.live as LiveState;
   if (typeof d.historyExercise === "string") out.historyExercise = d.historyExercise;
@@ -226,6 +235,7 @@ export function cloudData(s: AppState) {
     planFocus: s.planFocus,
     plan: s.plan,
     customExercises: s.customExercises,
+    pinned: s.pinned,
   };
 }
 
@@ -282,7 +292,7 @@ function workingFor(
   return { w: snapWeight(w), r: lift.reps || 8 };
 }
 
-const INC_CYCLE = [2.5, 5, 10];
+const INC_CYCLE = [1, 2.5, 5, 10];
 
 function liftsToPlan(lifts: GeneratedLift[], sessions: Session[]): PlanLift[] {
   return lifts.map((l, i) => {
@@ -340,6 +350,7 @@ export const useApp = create<AppState>()(
       live: emptyLive(),
       historyExercise: "Barbell Bench Press",
       customExercises: [],
+      pinned: ["Barbell Bench Press", "Back Squat", "Deadlift"],
 
       library: { query: "", category: "ALL" },
       apiKey: "",
@@ -450,7 +461,7 @@ export const useApp = create<AppState>()(
               focus: st.planFocus,
               lifts,
               liftIndex: 0,
-              inc: st.live.inc || 5,
+              inc: st.live.inc || 2.5,
               w: w0.w,
               r: w0.r,
             },
@@ -467,6 +478,45 @@ export const useApp = create<AppState>()(
 
       nextLift: () => get().selectLift(get().live.liftIndex + 1),
       prevLift: () => get().selectLift(get().live.liftIndex - 1),
+
+      // on-the-fly edits during a live workout
+      liveSwapLift: (name) =>
+        set((st) => {
+          const live = st.live;
+          if (!live.active) return {} as Partial<AppState>;
+          const i = live.liftIndex;
+          const cur = live.lifts[i];
+          if (!cur || cur.name === name) return {} as Partial<AppState>;
+          const id = Math.max(0, ...live.lifts.map((l) => l.id)) + 1;
+          const lifts = live.lifts.map((l, idx) => (idx === i ? { id, name, sets: cur.sets, reps: cur.reps, kg: 0 } : l));
+          const wk = workingFor(lifts[i], live.entries, st.sessions);
+          return { live: { ...live, lifts, w: wk.w, r: wk.r, restOn: false, rest: 0, restEndsAt: 0 } };
+        }),
+      liveAddLift: (name) =>
+        set((st) => {
+          const live = st.live;
+          if (!live.active) return {} as Partial<AppState>;
+          const exists = live.lifts.findIndex((l) => l.name === name);
+          if (exists >= 0) {
+            const wk = workingFor(live.lifts[exists], live.entries, st.sessions);
+            return { live: { ...live, liftIndex: exists, w: wk.w, r: wk.r, restOn: false, rest: 0, restEndsAt: 0 } };
+          }
+          const id = Math.max(0, ...live.lifts.map((l) => l.id)) + 1;
+          const lift = { id, name, sets: 3, reps: 10, kg: 0 };
+          const lifts = [...live.lifts, lift];
+          const wk = workingFor(lift, live.entries, st.sessions);
+          return { live: { ...live, lifts, liftIndex: lifts.length - 1, w: wk.w, r: wk.r, restOn: false, rest: 0, restEndsAt: 0 } };
+        }),
+      liveRemoveLift: () =>
+        set((st) => {
+          const live = st.live;
+          if (!live.active || live.lifts.length <= 1) return {} as Partial<AppState>;
+          const i = live.liftIndex;
+          const lifts = live.lifts.filter((_, idx) => idx !== i);
+          const ni = Math.min(i, lifts.length - 1);
+          const wk = workingFor(lifts[ni], live.entries, st.sessions);
+          return { live: { ...live, lifts, liftIndex: ni, w: wk.w, r: wk.r, restOn: false, rest: 0, restEndsAt: 0 } };
+        }),
 
       incW: () => set((st) => ({ live: { ...st.live, w: snapWeight(st.live.w + st.live.inc) } })),
       decW: () => set((st) => ({ live: { ...st.live, w: snapWeight(st.live.w - st.live.inc) } })),
@@ -519,8 +569,10 @@ export const useApp = create<AppState>()(
       finishWorkout: () =>
         set((st) => {
           const { live } = st;
-          const entries: SessionEntry[] = live.lifts
-            .map((l) => ({ name: l.name, sets: live.entries[l.name] ?? [] }))
+          // include every logged exercise — even ones swapped out / removed mid-session
+          const names = Array.from(new Set([...live.lifts.map((l) => l.name), ...Object.keys(live.entries)]));
+          const entries: SessionEntry[] = names
+            .map((name) => ({ name, sets: live.entries[name] ?? [] }))
             .filter((e) => e.sets.length > 0);
           if (!entries.length) return { live: emptyLive(), screen: "home" };
           const id = (st.sessions[0]?.id ?? 0) + 1;
@@ -583,6 +635,17 @@ export const useApp = create<AppState>()(
           }
           return { customExercises, plan };
         }),
+      registerCustomExercise: (name) =>
+        set((st) => {
+          const clean = name.trim().replace(/\s+/g, " ");
+          if (!clean) return {} as Partial<AppState>;
+          const lc = clean.toLowerCase();
+          const known =
+            EXERCISES.some((e) => e.name.toLowerCase() === lc) ||
+            st.customExercises.some((c) => c.name.toLowerCase() === lc);
+          if (known) return {} as Partial<AppState>;
+          return { customExercises: [...st.customExercises, { name: clean, group: "Your exercises" }] };
+        }),
 
       // ---- library ----
       setQuery: (q) => set((st) => ({ library: { ...st.library, query: q } })),
@@ -617,6 +680,11 @@ export const useApp = create<AppState>()(
         // authoritative replace so the server-side session-merge can't resurrect it
         writeUser(get(), { replace: true });
       },
+
+      togglePin: (name) =>
+        set((st) => ({
+          pinned: st.pinned.includes(name) ? st.pinned.filter((n) => n !== name) : [...st.pinned, name],
+        })),
 
       // ---- assistant ----
       generate: async (prompt) => {

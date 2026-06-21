@@ -1,7 +1,6 @@
 "use client";
 
 import { T } from "@/lib/tokens";
-import { StatusBar } from "@/components/chrome/StatusBar";
 
 /**
  * App viewport. On a phone (or installed PWA) it fills the screen; on desktop it
@@ -9,13 +8,7 @@ import { StatusBar } from "@/components/chrome/StatusBar";
  * it's the real app surface, with the iOS status bar, Dynamic Island and home
  * indicator that appear on every screen.
  */
-export function Phone({
-  children,
-  showChrome = true,
-}: {
-  children: React.ReactNode;
-  showChrome?: boolean;
-}) {
+export function Phone({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
@@ -39,43 +32,6 @@ export function Phone({
         }}
       >
         <div style={{ position: "absolute", inset: 0 }}>{children}</div>
-
-        {showChrome && (
-          <>
-            <StatusBar />
-            {/* Dynamic Island */}
-            <div
-              style={{
-                position: "absolute",
-                top: 11,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 124,
-                height: 36,
-                background: "#000",
-                borderRadius: 20,
-                zIndex: 60,
-                pointerEvents: "none",
-              }}
-            />
-            {/* Home indicator */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 9,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: 138,
-                height: 5,
-                borderRadius: 3,
-                background: T.ink,
-                opacity: 0.85,
-                zIndex: 60,
-                pointerEvents: "none",
-              }}
-            />
-          </>
-        )}
       </div>
     </div>
   );

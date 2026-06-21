@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { FONT, T } from "@/lib/tokens";
 import { num, fmtClock } from "@/lib/format";
 import { pbFor, lastTopFor } from "@/lib/derive";
 import { PlayTriangle } from "@/components/ui/icons";
+import { ExercisePicker } from "@/components/screens/ExercisePicker";
 import { useApp } from "@/store/useApp";
 
 export function SetLogger() {
@@ -22,6 +24,10 @@ export function SetLogger() {
   const finishWorkout = useApp((s) => s.finishWorkout);
   const startWorkout = useApp((s) => s.startWorkout);
   const openHistory = useApp((s) => s.openHistory);
+  const liveSwapLift = useApp((s) => s.liveSwapLift);
+  const liveAddLift = useApp((s) => s.liveAddLift);
+  const liveRemoveLift = useApp((s) => s.liveRemoveLift);
+  const [picker, setPicker] = useState<null | "swap" | "add">(null);
 
   const lift = live.lifts[live.liftIndex];
 
@@ -113,6 +119,13 @@ export function SetLogger() {
         ) : (
           <>FIRST TIME LOGGING THIS LIFT</>
         )}
+      </div>
+
+      {/* edit the workout on the fly */}
+      <div style={{ padding: "8px 22px 0", display: "flex", gap: 8 }}>
+        <EditBtn onClick={() => setPicker("swap")}>⇄ SWAP</EditBtn>
+        <EditBtn onClick={() => setPicker("add")}>＋ ADD</EditBtn>
+        <EditBtn onClick={liveRemoveLift} disabled={live.lifts.length <= 1}>✕ REMOVE</EditBtn>
       </div>
 
       {/* hero weight row */}
@@ -256,6 +269,18 @@ export function SetLogger() {
           </div>
         </div>
       )}
+
+      {picker && (
+        <ExercisePicker
+          title={picker === "swap" ? "SWAP EXERCISE" : "ADD EXERCISE"}
+          onClose={() => setPicker(null)}
+          onPick={(n) => {
+            if (picker === "swap") liveSwapLift(n);
+            else liveAddLift(n);
+            setPicker(null);
+          }}
+        />
+      )}
     </Shell>
   );
 }
@@ -266,7 +291,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       style={{
         position: "absolute",
         inset: 0,
-        padding: "54px 0 30px",
+        padding: "calc(env(safe-area-inset-top, 0px) + 10px) 0 calc(env(safe-area-inset-bottom, 0px) + 12px)",
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT.archivo,
@@ -278,6 +303,27 @@ function Shell({ children }: { children: React.ReactNode }) {
     >
       {children}
     </div>
+  );
+}
+
+function EditBtn({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        flex: 1,
+        border: `1.5px solid ${disabled ? T.line : T.ink}`,
+        background: "transparent",
+        color: disabled ? T.line : T.ink,
+        font: `700 11px/1 ${FONT.mono}`,
+        letterSpacing: 0.5,
+        padding: "9px 0",
+        cursor: disabled ? "default" : "pointer",
+      }}
+    >
+      {children}
+    </button>
   );
 }
 

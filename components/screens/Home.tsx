@@ -2,7 +2,7 @@
 
 import { FONT, T } from "@/lib/tokens";
 import { ScreenBody, ThemeToggle } from "@/components/screens/Frame";
-import { SlidersIcon, SparkIcon, PlayTriangle, ListIcon } from "@/components/ui/icons";
+import { SlidersIcon, SparkIcon, PlayTriangle, ListIcon, TrophyIcon } from "@/components/ui/icons";
 import { homeStats, pbFor } from "@/lib/derive";
 import { useApp } from "@/store/useApp";
 
@@ -32,10 +32,13 @@ export function Home() {
         }}
       >
         <span style={{ font: `700 13px/1 ${FONT.mono}`, letterSpacing: 1 }}>DAY {stats.dayNumber}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ font: `700 13px/1 ${FONT.mono}`, letterSpacing: 1 }}>
             STREAK {stats.streak}🔥
           </span>
+          <IconBtn label="Max board" onClick={() => go("achievements")}>
+            <TrophyIcon />
+          </IconBtn>
           <IconBtn label="Training log" onClick={() => go("sessions")}>
             <ListIcon />
           </IconBtn>

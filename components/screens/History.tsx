@@ -11,6 +11,9 @@ export function History() {
   const name = useApp((s) => s.historyExercise);
   const sessions = useApp((s) => s.sessions);
   const liveActive = useApp((s) => s.live.active);
+  const pinned = useApp((s) => s.pinned);
+  const togglePin = useApp((s) => s.togglePin);
+  const isPinned = pinned.includes(name);
 
   const h = historyFor(sessions, name);
   const back = () => go(liveActive ? "logger" : "home");
@@ -19,10 +22,27 @@ export function History() {
     <ScreenBody>
       <BackRow left="‹ BACK" right="HISTORY" onBack={back} />
 
-      <div style={{ padding: "10px 22px 14px", borderBottom: `2px solid ${T.ink}`, flex: "none" }}>
-        <div style={{ font: `400 36px/.9 ${FONT.anton}`, textTransform: "uppercase", letterSpacing: -0.5 }}>
+      <div style={{ padding: "10px 22px 14px", borderBottom: `2px solid ${T.ink}`, flex: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ font: `400 36px/.9 ${FONT.anton}`, textTransform: "uppercase", letterSpacing: -0.5, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
           {name}
         </div>
+        <button
+          onClick={() => togglePin(name)}
+          aria-label={isPinned ? "Unpin from Max board" : "Pin to Max board"}
+          style={{
+            flex: "none",
+            border: `2px solid ${isPinned ? T.accent : T.line}`,
+            background: isPinned ? T.accent : "transparent",
+            color: isPinned ? "#fff" : T.sub,
+            font: `700 11px/1 ${FONT.mono}`,
+            letterSpacing: 1,
+            padding: "8px 10px",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          ★ {isPinned ? "PINNED" : "PIN"}
+        </button>
       </div>
 
       {!h.hasData ? (

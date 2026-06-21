@@ -46,7 +46,7 @@ export function Launch() {
         color: T.ink,
         background: T.bg,
         border: "none",
-        padding: "80px 30px 40px",
+        padding: "calc(env(safe-area-inset-top, 0px) + 50px) 30px calc(env(safe-area-inset-bottom, 0px) + 30px)",
         overflow: "hidden",
         cursor: "pointer",
         textAlign: "center",
