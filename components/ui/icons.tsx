@@ -61,6 +61,16 @@ export const SlidersIcon = ({ size = 15 }: { size?: number }) => (
   </svg>
 );
 
+/** Training-log / history list. */
+export const ListIcon = ({ size = 15 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <path d="M9 6h12M9 12h12M9 18h12" />
+    <circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    <circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 /** Right-pointing "play" triangle — the logo delta rotated to start orientation. */
 export const PlayTriangle = ({ s = 16, color = "var(--mx-accent)" }: { s?: number; color?: string }) => (
   <span

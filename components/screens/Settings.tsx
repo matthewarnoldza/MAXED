@@ -11,6 +11,7 @@ export function Settings() {
   const apiKey = useApp((s) => s.apiKey);
   const model = useApp((s) => s.model);
   const serverHasKey = useApp((s) => s.serverHasKey);
+  const cloudOk = useApp((s) => s.cloudOk);
   const aiActive = !!apiKey || serverHasKey;
   const prefs = useApp((s) => s.prefs);
   const sessions = useApp((s) => s.sessions);
@@ -35,10 +36,10 @@ export function Settings() {
                 {currentUser?.name ?? "—"}
               </div>
             </div>
-            <span style={{ font: `700 9px/1 ${FONT.mono}`, letterSpacing: 1, color: T.sub, textAlign: "right" }}>
-              CLOUD
+            <span style={{ font: `700 9px/1.3 ${FONT.mono}`, letterSpacing: 1, color: cloudOk ? T.sub : T.accent, textAlign: "right" }}>
+              {cloudOk ? "CLOUD" : "OFFLINE"}
               <br />
-              SYNCED
+              {cloudOk ? "SYNCED" : "RETRYING"}
             </span>
           </div>
           <div style={{ display: "flex", gap: 10 }}>

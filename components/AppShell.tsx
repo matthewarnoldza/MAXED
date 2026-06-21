@@ -11,7 +11,8 @@ import { Assistant } from "@/components/screens/Assistant";
 import { SetLogger } from "@/components/screens/SetLogger";
 import { History } from "@/components/screens/History";
 import { Settings } from "@/components/screens/Settings";
-import { useApp, cloudData, localData, cacheKey, type ScreenId } from "@/store/useApp";
+import { SessionLog } from "@/components/screens/SessionLog";
+import { useApp, cloudData, cacheUser, cloudPost, type ScreenId } from "@/store/useApp";
 
 const SCREENS: Record<ScreenId, React.ComponentType> = {
   launch: Launch,
@@ -22,6 +23,7 @@ const SCREENS: Record<ScreenId, React.ComponentType> = {
   assistant: Assistant,
   logger: SetLogger,
   history: History,
+  sessions: SessionLog,
   settings: Settings,
 };
 
@@ -29,6 +31,8 @@ export function AppShell() {
   const screen = useApp((s) => s.screen);
   const theme = useApp((s) => s.theme);
   const currentUser = useApp((s) => s.currentUser);
+  const loadingUser = useApp((s) => s.loadingUser);
+  const cloudOk = useApp((s) => s.cloudOk);
   const tickRest = useApp((s) => s.tickRest);
 
   const lastCloud = useRef("");
@@ -60,18 +64,11 @@ export function AppShell() {
         lastId.current = s.currentUser.id;
         lastCloud.current = "";
       }
-      try {
-        localStorage.setItem(cacheKey(s.currentUser.id), JSON.stringify(localData(s)));
-      } catch {}
+      cacheUser(s);
       const cloud = JSON.stringify(cloudData(s));
       if (cloud === lastCloud.current) return;
       lastCloud.current = cloud;
-      const body = JSON.stringify({ userId: s.currentUser.id, data: cloudData(s) });
-      if (immediate && typeof navigator !== "undefined" && navigator.sendBeacon) {
-        navigator.sendBeacon("/api/state", new Blob([body], { type: "application/json" }));
-      } else {
-        void fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" }, body }).catch(() => {});
-      }
+      cloudPost(s.currentUser.id, s.currentUser.name, cloudData(s), { beacon: immediate });
     };
     const unsub = useApp.subscribe(() => {
       clearTimeout(t);
@@ -97,7 +94,45 @@ export function AppShell() {
     <div data-mx-theme={theme} style={{ minHeight: "100dvh" }}>
       <Phone>
         <Active />
+        {currentUser && (loadingUser || !cloudOk) && <SyncPill loading={loadingUser} />}
       </Phone>
+    </div>
+  );
+}
+
+/** Tiny non-blocking indicator: data loading, or a failed cloud save that will retry. */
+function SyncPill({ loading }: { loading: boolean }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 54,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 70,
+        pointerEvents: "none",
+        background: "var(--mx-bg)",
+        border: "1.5px solid var(--mx-line)",
+        color: "var(--mx-sub)",
+        font: "700 10px/1 var(--font-mono)",
+        letterSpacing: 1,
+        padding: "6px 12px",
+        borderRadius: 999,
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+      }}
+    >
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: loading ? "var(--mx-sub)" : "var(--mx-accent)",
+          animation: "glowpulse 1s infinite",
+        }}
+      />
+      {loading ? "SYNCING…" : "OFFLINE · WILL RETRY"}
     </div>
   );
 }

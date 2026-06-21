@@ -27,6 +27,7 @@ export type ScreenId =
   | "assistant"
   | "logger"
   | "history"
+  | "sessions"
   | "settings";
 
 export type Theme = "light" | "dark";
@@ -57,6 +58,7 @@ interface LiveState {
 interface AppState {
   hydrated: boolean;
   loadingUser: boolean;
+  cloudOk: boolean;
   screen: ScreenId;
   theme: Theme;
 
@@ -119,6 +121,10 @@ interface AppState {
   addToPlan: (name: string) => void;
   togglePlan: (name: string) => void;
   addCustomExercise: (name: string) => void;
+
+  // sessions / reuse
+  repeatSession: (id: number) => void;
+  deleteSession: (id: number) => void;
 
   // library
   setQuery: (q: string) => void;
@@ -230,23 +236,38 @@ export function localData(s: AppState) {
 
 export const cacheKey = (id: string) => `maxed:user:${id}`;
 
-function pushCloud(userId: string, data: unknown) {
-  void fetch("/api/state", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, data }),
-  }).catch(() => {});
-}
-
-/** Immediately persist the signed-in user's data to cache + cloud. Used when
- *  switching/leaving so the outgoing user's latest work can't be lost to the
- *  debounced autosave. */
-function persistNow(s: AppState) {
+/** Write just the on-device cache (fast, frequent). */
+export function cacheUser(s: AppState) {
   if (!s.currentUser) return;
   try {
     localStorage.setItem(cacheKey(s.currentUser.id), JSON.stringify(localData(s)));
   } catch {}
-  pushCloud(s.currentUser.id, cloudData(s));
+}
+
+/** POST a doc to the cloud. `name` lets the server self-heal a missing users row
+ *  (an offline-created profile then syncs cleanly once back online). Tracks cloudOk. */
+export function cloudPost(
+  userId: string,
+  name: string,
+  data: unknown,
+  opts: { replace?: boolean; beacon?: boolean } = {}
+) {
+  const body = JSON.stringify({ userId, name, data, replace: opts.replace });
+  if (opts.beacon && typeof navigator !== "undefined" && navigator.sendBeacon) {
+    navigator.sendBeacon("/api/state", new Blob([body], { type: "application/json" }));
+    return;
+  }
+  void fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" }, body })
+    .then((r) => useApp.setState({ cloudOk: r.ok }))
+    .catch(() => useApp.setState({ cloudOk: false }));
+}
+
+/** Immediately persist the signed-in user (cache + cloud). Used on switch / sign-out /
+ *  reset / delete so nothing is lost to the debounced autosave or a stale server merge. */
+function writeUser(s: AppState, opts: { replace?: boolean; beacon?: boolean } = {}) {
+  if (!s.currentUser) return;
+  cacheUser(s);
+  cloudPost(s.currentUser.id, s.currentUser.name, cloudData(s), opts);
 }
 
 function workingFor(
@@ -302,6 +323,7 @@ export const useApp = create<AppState>()(
     (set, get) => ({
       hydrated: false,
       loadingUser: false,
+      cloudOk: true,
       screen: "launch",
       theme: "dark",
 
@@ -356,7 +378,7 @@ export const useApp = create<AppState>()(
       loadUser: async (id, name) => {
         // flush the outgoing user before switching away (don't lose their last sets)
         const prev = get().currentUser;
-        if (prev && prev.id !== id) persistNow(get());
+        if (prev && prev.id !== id) writeUser(get());
         // gate cloud-sync while we load, so default/empty state can't clobber the cloud
         set({ loadingUser: true });
         let appliedFromCache = false;
@@ -385,9 +407,8 @@ export const useApp = create<AppState>()(
             if (data) {
               set(applyUserData(data));
             } else if (!appliedFromCache) {
-              const fresh = freshUserData();
-              set(applyUserData(fresh));
-              pushCloud(id, fresh);
+              set(applyUserData(freshUserData()));
+              writeUser(get());
             }
           }
         } catch {
@@ -398,7 +419,7 @@ export const useApp = create<AppState>()(
       },
 
       signOut: () => {
-        persistNow(get());
+        writeUser(get());
         set({ currentUser: null, screen: "login", live: emptyLive() });
       },
 
@@ -576,6 +597,27 @@ export const useApp = create<AppState>()(
 
       openHistory: (name) => set({ historyExercise: name, screen: "history" }),
 
+      // ---- sessions / reuse ----
+      repeatSession: (id) =>
+        set((st) => {
+          const s = st.sessions.find((x) => x.id === id);
+          if (!s) return {} as Partial<AppState>;
+          const plan: PlanLift[] = s.entries
+            .filter((e) => e.sets.length)
+            .map((e, i) => {
+              const top = e.sets.reduce((a, b) => (b.w > a.w ? b : a), e.sets[0]);
+              return { id: i + 1, name: e.name, sets: e.sets.length, reps: top.r || 10, kg: snapWeight(top.w || 0) };
+            });
+          if (!plan.length) return {} as Partial<AppState>;
+          return { plan, planTitle: s.title || "Workout", planFocus: s.focus || "SESSION", screen: "plan" };
+        }),
+
+      deleteSession: (id) => {
+        set((st) => ({ sessions: st.sessions.filter((x) => x.id !== id) }));
+        // authoritative replace so the server-side session-merge can't resurrect it
+        writeUser(get(), { replace: true });
+      },
+
       // ---- assistant ----
       generate: async (prompt) => {
         const cur = get();
@@ -659,17 +701,7 @@ export const useApp = create<AppState>()(
           assistant: { status: "idle", plan: null, prompt: DEFAULT_PROMPT, error: null },
         });
         // authoritative wipe: replace the cloud doc so the session-merge can't resurrect it
-        const u = get().currentUser;
-        if (u) {
-          try {
-            localStorage.setItem(cacheKey(u.id), JSON.stringify(localData(get())));
-          } catch {}
-          void fetch("/api/state", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: u.id, data: cloudData(get()), replace: true }),
-          }).catch(() => {});
-        }
+        writeUser(get(), { replace: true });
       },
     }),
     {

@@ -60,12 +60,14 @@ async function readDoc(userId: string): Promise<Doc | null> {
  *  stored doc; `replace:true` (a deliberate reset) overwrites wholesale. */
 export async function POST(req: Request) {
   try {
-    const { userId, data, replace } = (await req.json()) as {
+    const { userId, name, data, replace } = (await req.json()) as {
       userId?: string;
+      name?: string;
       data?: Doc;
       replace?: boolean;
     };
     if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 });
+    const cleanName = typeof name === "string" ? name.trim().slice(0, 40) : "";
 
     const incoming = (data ?? {}) as Doc;
     const toStore = replace ? incoming : mergeDoc(await readDoc(userId), incoming);
@@ -73,12 +75,18 @@ export async function POST(req: Request) {
 
     const db = getDb();
     if (db) {
+      // self-heal a missing users row (e.g. a profile created while offline) so the
+      // user_state foreign key is always satisfiable.
+      if (cleanName) {
+        await db.execute({ sql: "INSERT OR IGNORE INTO users (id, name) VALUES (?, ?)", args: [userId, cleanName] });
+      }
       await db.execute({
         sql: `INSERT INTO user_state (user_id, data, updated_at) VALUES (?, ?, datetime('now'))
               ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = datetime('now')`,
         args: [userId, json],
       });
     } else {
+      if (cleanName && !mem.users.has(userId)) mem.users.set(userId, { id: userId, name: cleanName });
       mem.state.set(userId, json);
     }
     return NextResponse.json({ ok: true });

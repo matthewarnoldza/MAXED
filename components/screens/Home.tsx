@@ -2,7 +2,7 @@
 
 import { FONT, T } from "@/lib/tokens";
 import { ScreenBody, ThemeToggle } from "@/components/screens/Frame";
-import { SlidersIcon, SparkIcon, PlayTriangle } from "@/components/ui/icons";
+import { SlidersIcon, SparkIcon, PlayTriangle, ListIcon } from "@/components/ui/icons";
 import { homeStats, pbFor } from "@/lib/derive";
 import { useApp } from "@/store/useApp";
 
@@ -36,6 +36,9 @@ export function Home() {
           <span style={{ font: `700 13px/1 ${FONT.mono}`, letterSpacing: 1 }}>
             STREAK {stats.streak}🔥
           </span>
+          <IconBtn label="Training log" onClick={() => go("sessions")}>
+            <ListIcon />
+          </IconBtn>
           <IconBtn label="Settings" onClick={() => go("settings")}>
             <SlidersIcon />
           </IconBtn>
@@ -68,6 +71,12 @@ export function Home() {
         <Stat label="BEST E1RM" value={stats.e1rmTop ? String(stats.e1rmTop) : "—"} />
         <Stat label="PBs/MO" value={String(stats.pbsThisMonth)} accent last />
       </div>
+
+      {sessions.length === 0 && (
+        <div style={{ padding: "10px 22px 0", font: `700 9px/1.5 ${FONT.mono}`, letterSpacing: 1, color: T.sub }}>
+          ↓ STARTER PLAN — TAP A LIFT, EDIT IT, OR ASK THE COACH
+        </div>
+      )}
 
       {/* today's lifts → tap for history */}
       <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
