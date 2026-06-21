@@ -24,7 +24,7 @@ export function Assistant() {
   const discard = useApp((s) => s.discardPlan);
   const reset = useApp((s) => s.resetAssistant);
 
-  const [draft, setDraft] = useState(a.prompt);
+  const [draft, setDraft] = useState("");
   const loading = a.status === "loading";
   const plan = a.plan;
 

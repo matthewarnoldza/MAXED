@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FONT, T } from "@/lib/tokens";
-import { OverloadArrow } from "@/components/ui/icons";
+import { OverloadArrow, PlayTriangle } from "@/components/ui/icons";
 import { useApp } from "@/store/useApp";
 
 export function Login() {
@@ -66,7 +66,7 @@ export function Login() {
               }}
             >
               <span style={{ font: `400 30px/1 ${FONT.anton}`, textTransform: "uppercase", letterSpacing: -0.5 }}>{p.name}</span>
-              <span style={{ color: T.accent, font: `400 26px/1 ${FONT.anton}` }}>▶</span>
+              <PlayTriangle s={16} color={T.accent} />
             </button>
             <button
               onClick={() => removeProfile(p.id)}

@@ -2,7 +2,7 @@
 
 import { FONT, T } from "@/lib/tokens";
 import { ScreenBody, ThemeToggle } from "@/components/screens/Frame";
-import { GearIcon, SparkIcon } from "@/components/ui/icons";
+import { SlidersIcon, SparkIcon, PlayTriangle } from "@/components/ui/icons";
 import { homeStats, pbFor } from "@/lib/derive";
 import { useApp } from "@/store/useApp";
 
@@ -37,7 +37,7 @@ export function Home() {
             STREAK {stats.streak}🔥
           </span>
           <IconBtn label="Settings" onClick={() => go("settings")}>
-            <GearIcon />
+            <SlidersIcon />
           </IconBtn>
           <ThemeToggle />
         </div>
@@ -102,30 +102,18 @@ export function Home() {
 
       {/* CTAs */}
       <div style={{ padding: "12px 22px 0", display: "flex", flexDirection: "column", gap: 10 }}>
-        <button
-          onClick={() => go("assistant")}
-          style={{
-            width: "100%",
-            border: `2px solid ${T.ink}`,
-            background: "transparent",
-            color: T.ink,
-            padding: "14px 16px",
-            font: `700 13px/1 ${FONT.mono}`,
-            letterSpacing: 1.5,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => go("assistant")} style={pickBtn}>
             <span style={{ color: T.accent, display: "inline-flex" }}>
               <SparkIcon />
             </span>
-            ASK COACH AI — NEW WORKOUT
-          </span>
-          <span style={{ color: T.accent }}>›</span>
-        </button>
+            ASK COACH
+          </button>
+          <button onClick={() => go("library")} style={pickBtn}>
+            <span style={{ color: T.accent, font: `400 18px/0 ${FONT.anton}` }}>+</span>
+            BUILD OWN
+          </button>
+        </div>
         <button
           onClick={startWorkout}
           style={{
@@ -143,7 +131,7 @@ export function Home() {
             justifyContent: "space-between",
           }}
         >
-          Start workout<span style={{ color: T.accent }}>▶</span>
+          Start workout<PlayTriangle s={20} color={T.accent} />
         </button>
       </div>
     </ScreenBody>
@@ -155,6 +143,21 @@ function stackTitle(title: string): [string, string | null] {
   const i = t.lastIndexOf(" ");
   return i > 0 ? [t.slice(0, i), t.slice(i + 1)] : [t, null];
 }
+
+const pickBtn: React.CSSProperties = {
+  flex: 1,
+  border: `2px solid ${T.ink}`,
+  background: "transparent",
+  color: T.ink,
+  padding: "14px 8px",
+  font: `700 12px/1 ${FONT.mono}`,
+  letterSpacing: 1,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 7,
+};
 
 function IconBtn({ children, onClick, label }: { children: React.ReactNode; onClick: () => void; label: string }) {
   return (

@@ -2,7 +2,7 @@
 
 import { FONT, T } from "@/lib/tokens";
 import { ScreenBody, BackRow } from "@/components/screens/Frame";
-import { ChevronUp, ChevronDown } from "@/components/ui/icons";
+import { ChevronUp, ChevronDown, PlayTriangle } from "@/components/ui/icons";
 import { useApp } from "@/store/useApp";
 
 export function Plan() {
@@ -85,7 +85,7 @@ export function Plan() {
             cursor: plan.length ? "pointer" : "default",
           }}
         >
-          Start ▶
+          Start <PlayTriangle s={16} color="#fff" />
         </button>
       </div>
     </ScreenBody>

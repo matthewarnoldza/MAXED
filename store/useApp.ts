@@ -73,6 +73,7 @@ interface AppState {
   plan: PlanLift[];
   live: LiveState;
   historyExercise: string;
+  customExercises: { name: string; group: string }[];
 
   library: { query: string; category: Filter };
   apiKey: string;
@@ -114,6 +115,8 @@ interface AppState {
   movePlan: (i: number, dir: -1 | 1) => void;
   removeFromPlan: (id: number) => void;
   addToPlan: (name: string) => void;
+  togglePlan: (name: string) => void;
+  addCustomExercise: (name: string) => void;
 
   // library
   setQuery: (q: string) => void;
@@ -146,7 +149,7 @@ const DEFAULT_PREFS: Prefs = {
 };
 
 const DEFAULT_PLAN: PlanLift[] = [
-  { id: 1, name: "Bench Press", sets: 4, reps: 8, kg: 60 },
+  { id: 1, name: "Barbell Bench Press", sets: 4, reps: 8, kg: 60 },
   { id: 2, name: "Incline DB Press", sets: 3, reps: 10, kg: 24 },
   { id: 3, name: "Overhead Press", sets: 4, reps: 6, kg: 35 },
   { id: 4, name: "Lateral Raise", sets: 3, reps: 15, kg: 10 },
@@ -180,6 +183,7 @@ function freshUserData() {
     planTitle: "Push Day",
     planFocus: "HYPERTROPHY",
     plan: DEFAULT_PLAN,
+    customExercises: [] as { name: string; group: string }[],
   };
 }
 
@@ -193,6 +197,7 @@ function applyUserData(d: Record<string, unknown>): Partial<AppState> {
     planTitle: typeof d.planTitle === "string" ? d.planTitle : "Push Day",
     planFocus: typeof d.planFocus === "string" ? d.planFocus : "HYPERTROPHY",
     plan: Array.isArray(d.plan) && d.plan.length ? (d.plan as PlanLift[]) : DEFAULT_PLAN,
+    customExercises: Array.isArray(d.customExercises) ? (d.customExercises as { name: string; group: string }[]) : [],
   };
   if (d.live && typeof d.live === "object") out.live = d.live as LiveState;
   if (typeof d.historyExercise === "string") out.historyExercise = d.historyExercise;
@@ -210,6 +215,7 @@ export function cloudData(s: AppState) {
     planTitle: s.planTitle,
     planFocus: s.planFocus,
     plan: s.plan,
+    customExercises: s.customExercises,
   };
 }
 
@@ -304,7 +310,8 @@ export const useApp = create<AppState>()(
       planFocus: "HYPERTROPHY",
       plan: DEFAULT_PLAN,
       live: emptyLive(),
-      historyExercise: "Bench Press",
+      historyExercise: "Barbell Bench Press",
+      customExercises: [],
 
       library: { query: "", category: "ALL" },
       apiKey: "",
@@ -516,6 +523,33 @@ export const useApp = create<AppState>()(
           const last = lastTopFor(st.sessions, name);
           return { plan: [...st.plan, { id, name, sets: 3, reps: 10, kg: last?.w ?? 0 }] };
         }),
+      togglePlan: (name) =>
+        set((st) => {
+          const existing = st.plan.find((p) => p.name.toLowerCase() === name.toLowerCase());
+          if (existing) return { plan: st.plan.filter((p) => p.id !== existing.id) };
+          const id = Math.max(0, ...st.plan.map((p) => p.id)) + 1;
+          const last = lastTopFor(st.sessions, name);
+          return { plan: [...st.plan, { id, name, sets: 3, reps: 10, kg: last?.w ?? 0 }] };
+        }),
+      addCustomExercise: (name) =>
+        set((st) => {
+          const clean = name.trim().replace(/\s+/g, " ");
+          if (!clean) return {} as Partial<AppState>;
+          const lc = clean.toLowerCase();
+          const known =
+            EXERCISES.some((e) => e.name.toLowerCase() === lc) ||
+            st.customExercises.some((c) => c.name.toLowerCase() === lc);
+          const customExercises = known
+            ? st.customExercises
+            : [...st.customExercises, { name: clean, group: "Your exercises" }];
+          let plan = st.plan;
+          if (!plan.some((p) => p.name.toLowerCase() === lc)) {
+            const id = Math.max(0, ...plan.map((p) => p.id)) + 1;
+            const last = lastTopFor(st.sessions, clean);
+            plan = [...plan, { id, name: clean, sets: 3, reps: 10, kg: last?.w ?? 0 }];
+          }
+          return { customExercises, plan };
+        }),
 
       // ---- library ----
       setQuery: (q) => set((st) => ({ library: { ...st.library, query: q } })),
@@ -578,6 +612,7 @@ export const useApp = create<AppState>()(
         set({
           sessions: [],
           stances: {},
+          customExercises: [],
           plan: DEFAULT_PLAN,
           planTitle: "Push Day",
           planFocus: "HYPERTROPHY",

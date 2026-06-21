@@ -1,11 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#FF2D00"/>
-  <!-- progressive-overload arrow -->
-  <path d="M256 118 L302 190 L210 190 Z" fill="#FFFFFF"/>
-  <!-- geometric MX wordmark, vector strokes (font-independent) -->
-  <g fill="none" stroke="#FFFFFF" stroke-width="36" stroke-linejoin="miter" stroke-linecap="butt">
-    <path d="M118 384 L118 238 L186 318 L254 238 L254 384"/>
-    <path d="M286 238 L398 384"/>
-    <path d="M398 238 L286 384"/>
-  </g>
+  <!-- progressive-overload delta — the mark, no wordmark -->
+  <path d="M256 140 L384 372 L128 372 Z" fill="#FFFFFF"/>
 </svg>

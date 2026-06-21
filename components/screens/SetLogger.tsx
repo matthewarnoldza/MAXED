@@ -3,6 +3,7 @@
 import { FONT, T } from "@/lib/tokens";
 import { num, fmtClock } from "@/lib/format";
 import { pbFor, lastTopFor } from "@/lib/derive";
+import { PlayTriangle } from "@/components/ui/icons";
 import { useApp } from "@/store/useApp";
 
 export function SetLogger() {
@@ -33,7 +34,7 @@ export function SetLogger() {
             Start today&apos;s plan to begin logging sets.
           </div>
           <button onClick={startWorkout} style={primaryBtn}>
-            Start workout ▶
+            Start workout <PlayTriangle s={16} color="#fff" />
           </button>
           <button onClick={() => go("home")} style={ghostLink}>
             ‹ BACK HOME

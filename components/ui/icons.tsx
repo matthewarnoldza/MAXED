@@ -59,6 +59,34 @@ export const SparkIcon = ({ size = 15 }: { size?: number }) => (
   </svg>
 );
 
+/** Settings — sliders/adjustments. Deliberately distinct from the sun/moon toggle. */
+export const SlidersIcon = ({ size = 15 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+    <circle cx="16" cy="6" r="2.5" fill="var(--mx-bg)" />
+    <circle cx="8" cy="12" r="2.5" fill="var(--mx-bg)" />
+    <circle cx="17" cy="18" r="2.5" fill="var(--mx-bg)" />
+  </svg>
+);
+
+/** Right-pointing "play" triangle — the logo delta rotated to start orientation. */
+export const PlayTriangle = ({ s = 16, color = "var(--mx-accent)" }: { s?: number; color?: string }) => (
+  <span
+    aria-hidden
+    style={{
+      display: "inline-block",
+      verticalAlign: "middle",
+      width: 0,
+      height: 0,
+      borderTop: `${s * 0.58}px solid transparent`,
+      borderBottom: `${s * 0.58}px solid transparent`,
+      borderLeft: `${s}px solid ${color}`,
+    }}
+  />
+);
+
 /** The OVERLOAD progressive-overload arrow (red up-triangle). Scales with the wordmark. */
 export const OverloadArrow = ({
   w = 17,

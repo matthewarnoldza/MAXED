@@ -41,10 +41,15 @@ interface Move {
   equip: string;
 }
 
-const POOL: Move[] = [
+function dedupe(list: Move[]): Move[] {
+  const seen = new Set<string>();
+  return list.filter((mv) => (seen.has(mv.name) ? false : (seen.add(mv.name), true)));
+}
+
+const POOL: Move[] = dedupe([
   ...EXERCISES.map((e) => ({ name: e.name, cat: e.cat, m: e.m, equip: EQUIPMENT[e.name] ?? "barbell" })),
   ...EXTRA,
-];
+]);
 
 export function synthWorkout(input: SynthInput): SynthResult {
   const p = input.prompt.toLowerCase();
