@@ -4,6 +4,12 @@ import { generateWorkout, type RawWorkout } from "@/lib/openrouter";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** Lightweight capability probe: does the server have an OpenRouter key?
+ *  Lets the UI show "live AI" vs "offline coach" honestly without exposing the key. */
+export async function GET() {
+  return NextResponse.json({ hasServerKey: !!process.env.OPENROUTER_API_KEY });
+}
+
 const FALLBACK_CONTEXT = `# ATHLETE PROFILE
 (no profile provided — generating without memory)
 - Goal: general strength + muscle

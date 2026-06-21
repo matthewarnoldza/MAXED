@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FONT, T } from "@/lib/tokens";
 import { ScreenBody } from "@/components/screens/Frame";
 import { shortDate } from "@/lib/derive";
@@ -19,6 +19,8 @@ export function Assistant() {
   const sessions = useApp((s) => s.sessions);
   const stances = useApp((s) => s.stances);
   const apiKey = useApp((s) => s.apiKey);
+  const serverHasKey = useApp((s) => s.serverHasKey);
+  const aiActive = !!apiKey || serverHasKey;
   const generate = useApp((s) => s.generate);
   const accept = useApp((s) => s.acceptPlan);
   const discard = useApp((s) => s.discardPlan);
@@ -26,6 +28,13 @@ export function Assistant() {
 
   const [draft, setDraft] = useState("");
   const loading = a.status === "loading";
+
+  // Re-opening the coach after accept/discard should land on a fresh prompt,
+  // not the stale "PLAN SET ✓" / "DISCARDED" card.
+  useEffect(() => {
+    if (a.status === "accepted" || a.status === "discarded") reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const plan = a.plan;
 
   // visible memory — what the coach "knows" about you
@@ -49,7 +58,7 @@ export function Assistant() {
         </button>
         <span style={{ display: "flex", alignItems: "center", gap: 7, font: `700 12px/1 ${FONT.mono}`, letterSpacing: 1, color: T.accent }}>
           <span style={{ width: 8, height: 8, background: T.accent, borderRadius: "50%", animation: loading ? "glowpulse .6s infinite" : "glowpulse 1.1s infinite" }} />
-          {loading ? "THINKING" : apiKey ? "COACH AI" : "COACH · LOCAL"}
+          {loading ? "THINKING" : aiActive ? "COACH AI" : "COACH · LOCAL"}
         </span>
       </div>
 

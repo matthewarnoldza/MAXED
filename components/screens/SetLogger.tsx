@@ -124,15 +124,16 @@ export function SetLogger() {
           </div>
           <button
             onClick={cycleInc}
+            aria-label={`Change weight step, currently ${num(live.inc)} kg`}
             style={{
               border: "none",
               background: "transparent",
               color: T.accent,
               font: `700 13px/1 ${FONT.mono}`,
               letterSpacing: 2,
-              marginTop: 4,
+              margin: "2px 0 0",
               cursor: "pointer",
-              padding: 0,
+              padding: "6px 10px",
               whiteSpace: "nowrap",
             }}
           >

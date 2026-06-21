@@ -10,6 +10,8 @@ export function Settings() {
   const signOut = useApp((s) => s.signOut);
   const apiKey = useApp((s) => s.apiKey);
   const model = useApp((s) => s.model);
+  const serverHasKey = useApp((s) => s.serverHasKey);
+  const aiActive = !!apiKey || serverHasKey;
   const prefs = useApp((s) => s.prefs);
   const sessions = useApp((s) => s.sessions);
   const setApiKey = useApp((s) => s.setApiKey);
@@ -81,13 +83,13 @@ export function Settings() {
               style={{
                 font: `700 10px/1 ${FONT.mono}`,
                 letterSpacing: 1,
-                color: apiKey ? "#fff" : T.sub,
-                background: apiKey ? T.accent : "transparent",
-                border: apiKey ? "none" : `1.5px solid ${T.line}`,
+                color: aiActive ? "#fff" : T.sub,
+                background: aiActive ? T.accent : "transparent",
+                border: aiActive ? "none" : `1.5px solid ${T.line}`,
                 padding: "5px 8px",
               }}
             >
-              {apiKey ? "● LIVE AI" : "○ OFFLINE COACH"}
+              {aiActive ? "● LIVE AI" : "○ OFFLINE COACH"}
             </span>
           </div>
           <Field label="OPENROUTER API KEY">
@@ -113,8 +115,9 @@ export function Settings() {
             />
           </Field>
           <p style={note}>
-            Without a key the coach still builds real plans on-device from your history. Add an{" "}
-            <span style={{ color: T.ink }}>openrouter.ai</span> key for live AI. It is stored only on this device.
+            {serverHasKey && !apiKey
+              ? "Live AI is enabled on this deployment. You can override the model below, or paste your own openrouter.ai key — stored only on this device."
+              : "Without a key the coach still builds real plans on-device from your history. Add an openrouter.ai key for live AI — stored only on this device."}
           </p>
         </Section>
 
@@ -133,6 +136,9 @@ export function Settings() {
             <input
               className="mxin"
               type="number"
+              inputMode="numeric"
+              min={0}
+              step={5}
               value={prefs.rest_default}
               onChange={(e) => setPref("rest_default", Math.max(0, Number(e.target.value) || 0))}
               style={input}

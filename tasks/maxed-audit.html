@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MAXED — Full Audit & Fixes</title>
+<style>
+  :root{
+    --crit:#dc2626; --high:#ea580c; --med:#f59e0b; --low:#2563eb; --nit:#6b7280; --ok:#10b981;
+    --add:#16a34a; --addbg:#dcfce7;
+    --bg:#ffffff; --panel:#f6f7f9; --ink:#0b0d12; --sub:#5b6472; --line:#e3e6eb; --accent:#ff2d00;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b0d12; --panel:#141821; --ink:#e7ecf5; --sub:#8c97a8; --line:#222936; --addbg:#0f2a18; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0 0 6px}
+  h2{font-size:19px;margin:38px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  .lede{color:var(--sub);margin:0 0 18px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;background:var(--panel);padding:1px 6px;border-radius:5px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 6px}
+  .stat{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat b{display:block;font-size:26px;letter-spacing:-.02em}
+  .stat span{color:var(--sub);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .item{background:var(--panel);border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:14px 16px;margin:10px 0}
+  .item.crit{border-left-color:var(--crit)} .item.high{border-left-color:var(--high)}
+  .item.med{border-left-color:var(--med)} .item.low{border-left-color:var(--low)} .item.nit{border-left-color:var(--nit)}
+  .chip{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:999px;color:#fff;vertical-align:middle;margin-right:8px}
+  .chip.crit{background:var(--crit)} .chip.high{background:var(--high)} .chip.med{background:var(--med);color:#241a00}
+  .chip.low{background:var(--low)} .chip.nit{background:var(--nit)}
+  .tt{font-weight:650}
+  .meta{color:var(--sub);font-size:13px;margin-top:4px}
+  .meta code{font-size:12px}
+  .fix{margin-top:7px;font-size:14px}
+  .fix b{color:var(--ok)}
+  .rec .fix b{color:var(--low)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0 16px;margin:10px 0}
+  details>summary{cursor:pointer;padding:14px 0;font-weight:650;list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"▸ ";color:var(--sub)}
+  details[open]>summary::before{content:"▾ "}
+  details .body{padding:0 0 14px}
+  .ok{color:var(--ok);font-weight:700}
+  ul{margin:6px 0 6px 0;padding-left:20px}
+  li{margin:3px 0}
+  .verify li{color:var(--ink)}
+  .foot{color:var(--sub);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MAXED — Full Audit &amp; Fixes</h1>
+  <p class="lede">Mechanics + visual audit via an 8-dimension multi-agent workflow (each finding adversarially verified) plus a runtime browser pass across every screen in both themes. Real bugs fixed and verified; larger improvements listed as a roadmap.</p>
+
+  <div class="stats">
+    <div class="stat"><b>97</b><span>audit agents</span></div>
+    <div class="stat"><b>72</b><span>verified findings</span></div>
+    <div class="stat"><b>20</b><span>fixed now</span></div>
+    <div class="stat"><b>1</b><span>critical (live AI)</span></div>
+    <div class="stat"><b>✓</b><span>tsc · build · e2e</span></div>
+  </div>
+
+  <h2>TL;DR</h2>
+  <p>The headline result: <b>live AI generation was completely broken</b> — every request 502'd because the JSON schema used <code>minItems:3</code>, which Anthropic's structured output rejects. The app silently fell back to the on-device coach every time, so you would have shipped with a dead OpenRouter integration. That's fixed and verified against the real API. Alongside it, several core-feature correctness bugs (progressive-overload deltas, a surprise permanent ban, a non-functional REFINE, multi-device data loss) and a batch of UX/visual nits are fixed. The app builds clean and the main flows pass an automated browser run.</p>
+
+  <h2>Fixed — Critical</h2>
+  <div class="item crit">
+    <span class="chip crit">critical</span><span class="tt">Live AI never worked — every generation 502'd</span>
+    <div class="meta"><code>lib/schema.ts</code> · category: bug</div>
+    <p>OpenRouter/Anthropic rejected the request: <code>minItems values other than 0 or 1 are not supported</code>. The client caught the 502 and used the offline generator, so the failure was invisible — the live coach, your OpenRouter key, everything, was dead.</p>
+    <div class="fix"><b>Fix:</b> removed <code>minItems</code> from the schema; enforce “3–8 exercises” in the system prompt instead. <span class="ok">Verified: live API now returns a real, tailored plan that respects banned lifts &amp; overload.</span></div>
+  </div>
+
+  <h2>Fixed — High</h2>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">Progressive-overload “+” loads were stored as absolute kg</span>
+    <div class="meta"><code>store/useApp.ts · liftsToPlan</code> · bug</div>
+    <p>A lift meaning “last PB + 5 kg” became a flat <b>5 kg</b> on accept (<code>parseFloat('+5')===5</code>). The headline coaching feature silently produced near-zero loads.</p>
+    <div class="fix"><b>Fix:</b> deltas now resolve against the athlete’s PB (<code>base + Δ</code>); absolute and <code>BW</code> loads handled separately.</div>
+  </div>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">Accepting an AI plan permanently banned exercises</span>
+    <div class="meta"><code>store/useApp.ts · acceptPlan/inferBans</code> · data-loss</div>
+    <p>A one-off quick-start like “Legs, no back squats” wrote a <b>durable, cloud-synced</b> banned stance for Back Squat — affecting every future workout &amp; AI request, with no UI cue and no easy undo.</p>
+    <div class="fix"><b>Fix:</b> removed the durable-ban side effect from accept (the request is already honoured for that one plan). Bans are now only set explicitly in the Library.</div>
+  </div>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">“REFINE” didn’t refine — it regenerated from scratch</span>
+    <div class="meta"><code>store/useApp.ts · generate</code> · bug</div>
+    <p>“Swap lift 2 for a cable move” was treated as a brand-new standalone request; the current plan was never sent. The refine plumbing in <code>openrouter.ts</code> was dead from the UI.</p>
+    <div class="fix"><b>Fix:</b> when a plan is on screen it’s sent as the <code>draft</code> so the model edits <em>that</em> plan. Also added a double-submit guard.</div>
+  </div>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">Two devices (same user) clobbered each other’s logged workouts</span>
+    <div class="meta"><code>app/api/state/route.ts</code> · data-loss</div>
+    <p>Each device POSTs the whole JSON doc; an unconditional overwrite meant a stale device could wipe the other’s sessions — the irreplaceable training log.</p>
+    <div class="fix"><b>Fix:</b> server now <b>union-merges sessions</b> by timestamp on every save (a stale write can’t drop the other device’s log); a deliberate Reset sends <code>replace:true</code> to clear authoritatively. <span class="ok">Verified via API: stale “B” flush returned B+A; reset clears.</span></div>
+  </div>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">Generator compound list was stale vs the renamed library</span>
+    <div class="meta"><code>lib/generator.ts · COMPOUNDS</code> · bug / continuity</div>
+    <p>The library renamed “Bench Press” → “Barbell Bench Press”, so the compound set no longer matched: bench was treated as an isolation lift (wrong set count, no overload), and a redundant accessory pool could emit names absent from the library (forking PB history).</p>
+    <div class="fix"><b>Fix:</b> aligned the compound names to the library and dropped the redundant pool. <span class="ok">Verified: bench detected as compound (4 sets).</span></div>
+  </div>
+
+  <div class="item high">
+    <span class="chip high">high</span><span class="tt">Offline coach misread “legs, no back squats” as a Pull day</span>
+    <div class="meta"><code>lib/generator.ts · resolveFocus</code> · bug</div>
+    <p>The focus resolver matched “back” (from “back squats”) before checking leg keywords, producing a pull workout including Deadlift.</p>
+    <div class="fix"><b>Fix:</b> legs checked first; arms matched on a word boundary so “warm up” can’t false-match. <span class="ok">Verified: → Leg Day, excludes Back Squat.</span></div>
+  </div>
+
+  <h2>Fixed — Medium</h2>
+  <div class="item med">
+    <span class="chip med">med</span><span class="tt">AI status lied: “OFFLINE COACH” even when live AI works</span>
+    <div class="meta"><code>api/workout/generate (GET) · Settings · Assistant</code> · ux</div>
+    <p>Settings &amp; the Assistant header keyed off the in-app key only, so on your Vercel deploy (server env key set) they’d say “offline”/“local” while live AI actually ran.</p>
+    <div class="fix"><b>Fix:</b> added a server-key capability probe; UI shows “LIVE AI” / “COACH AI” when either the server or in-app key is present. <span class="ok">Verified.</span></div>
+  </div>
+  <div class="item med">
+    <span class="chip med">med</span><span class="tt">Rest timer drifted on reload / iOS backgrounding</span>
+    <div class="meta"><code>store/useApp.ts · tickRest</code> · bug</div>
+    <p>Pure −1/sec decrement; locking the phone (iOS throttles timers) or reloading under-counted by the away-duration.</p>
+    <div class="fix"><b>Fix:</b> wall-clock anchored (<code>restEndsAt</code>); remaining time recomputed from the clock, accurate across background/reload.</div>
+  </div>
+  <div class="item med">
+    <span class="chip med">med</span><span class="tt">Re-opening the coach showed a stale “PLAN SET ✓” card</span>
+    <div class="meta"><code>components/screens/Assistant.tsx</code> · ux</div>
+    <p>After accepting/discarding then navigating away, the coach reopened on the old result card, not a fresh prompt — felt broken on second use.</p>
+    <div class="fix"><b>Fix:</b> resets to the prompt view on entry unless a plan is actively pending.</div>
+  </div>
+
+  <h2>Fixed — Low / Nits</h2>
+  <div class="item low">
+    <span class="chip low">low</span><span class="tt">Empty plan → Home “Start” was a dead button</span>
+    <div class="meta"><code>Home.tsx</code> — now reads “Add lifts first” and opens the builder.</div>
+  </div>
+  <div class="item nit">
+    <span class="chip nit">nit</span><span class="tt">Several polish fixes</span>
+    <div class="meta">“OFFLINE READY” splash → “CLOUD SYNCED” (no service worker yet) · History session top-set marker was an invisible space → heaviest set now shown in ink · weight-step cycler tap-target enlarged + aria-label · Settings rest input got <code>min/step/inputMode</code> · removed dead <code>GearIcon</code> export.</div>
+  </div>
+
+  <h2>Recommended next (not yet done)</h2>
+  <p class="lede">Real, verified findings that are larger features or lower-priority polish — your call on which to take.</p>
+
+  <details class="rec"><summary><span class="chip high">high</span> No service worker — installed PWA can’t cold-boot offline</summary>
+    <div class="body">The splash said “OFFLINE READY” and the manifest is <code>standalone</code>, but there’s no service worker, so an installed app with no network won’t load at all (the on-device cache is moot if the shell can’t boot, and fonts come from Google). <span class="fix"><b>Do:</b> add <code>next-pwa</code> (or a manual SW) to precache the shell + self-host fonts — or drop the offline implication (I already softened the splash label).</span></div>
+  </details>
+  <details class="rec"><summary><span class="chip high">high</span> Exercise-name continuity across AI plans</summary>
+    <div class="body">The live model may return “Bench Press” while your history is under “Barbell Bench Press”, forking the PB/overload bucket. <span class="fix"><b>Do:</b> add canonical names to the system prompt and/or a name-normaliser on accept that snaps to the closest library name.</span></div>
+  </details>
+  <details class="rec"><summary><span class="chip med">med</span> No way to view / delete / repeat a past session</summary>
+    <div class="body">History is per-exercise only; completed sessions are write-only. A training logger should let you open “what did I do last Tuesday”, delete a mis-logged session, and repeat a workout. <span class="fix"><b>Do:</b> add a session log + per-session detail with delete/repeat.</span></div>
+  </details>
+  <details class="rec"><summary><span class="chip med">med</span> Silent loading / sync-failure states</summary>
+    <div class="body"><code>loadUser</code> has no spinner and failed cloud writes are swallowed — a user whose saves are 500-ing has zero indication. <span class="fix"><b>Do:</b> surface a loading state (keyed on <code>loadingUser</code>) and a sync-failure indicator.</span></div>
+  </details>
+  <details class="rec"><summary><span class="chip med">med</span> Offline-created profile can’t sync later (FK)</summary>
+    <div class="body">If <code>/api/auth</code> fails (offline), a <code>local-…</code> profile is created with no <code>users</code> row; later state saves are rejected by the foreign key (silent 500). <span class="fix"><b>Do:</b> create the <code>users</code> row on first successful online sync, or block profile creation while offline.</span></div>
+  </details>
+  <details class="rec"><summary><span class="chip med">med</span> Other UX gaps</summary>
+    <div class="body"><ul>
+      <li><b>Duplicate-name profiles</b> are indistinguishable on Login — add a created-date / last-trained sub-label.</li>
+      <li><b>First-run</b> shows the canned default plan as “TODAY” with no “starter — personalise it” cue.</li>
+      <li><b>Bodyweight / 0 kg logging</b> — the logger forces a kg; Pull-up/Plank have no proper mode and a 0 kg set can be logged.</li>
+    </ul></div>
+  </details>
+  <details class="rec"><summary><span class="chip nit">nit</span> Hardening &amp; platform polish</summary>
+    <div class="body"><ul>
+      <li>No rate-limit on <code>/api/auth</code> and no server-side profile delete (junk rows accrue on a public URL).</li>
+      <li>iOS <code>env(safe-area-inset-*)</code> not applied under <code>viewportFit:cover</code> (notch / home-indicator).</li>
+      <li>Broader keyboard a11y &amp; <code>:focus-visible</code> styling.</li>
+      <li>In-flight guards on <code>logSet</code>/<code>acceptPlan</code> (only <code>generate</code> is guarded).</li>
+    </ul></div>
+  </details>
+
+  <h2>Verification</h2>
+  <ul class="verify">
+    <li><span class="ok">✓</span> <code>tsc --noEmit</code> clean · <code>next build</code> green (3 API routes, static prerender).</li>
+    <li><span class="ok">✓</span> Live OpenRouter call returns a real plan (was 502) — tested with a banned-lift prompt.</li>
+    <li><span class="ok">✓</span> Unit tests: 28 derive/generator/profile assertions + focus/compound resolver test.</li>
+    <li><span class="ok">✓</span> Browser e2e: COACH-AI label, live generate, fresh assistant on re-entry, no surprise ban (5/5 core).</li>
+    <li><span class="ok">✓</span> Session-merge verified via API (stale device preserved both logs; reset clears).</li>
+    <li><span class="ok">✓</span> Full-screen capture in dark + light mode reviewed; Turso schema verified &amp; test users removed (DB pristine).</li>
+  </ul>
+
+  <p class="foot">Generated for the MAXED audit · all “Fixed” items are in the working tree and pass build. The “Recommended next” items are intentionally left for you to prioritise.</p>
+</div>
+</body>
+</html>

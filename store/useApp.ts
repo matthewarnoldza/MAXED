@@ -49,6 +49,7 @@ interface LiveState {
   inc: number;
   rest: number;
   restOn: boolean;
+  restEndsAt: number;
   flash: boolean;
   pbFire: boolean;
 }
@@ -78,6 +79,7 @@ interface AppState {
   library: { query: string; category: Filter };
   apiKey: string;
   model: string;
+  serverHasKey: boolean;
   assistant: {
     status: AssistantStatus;
     plan: GeneratedPlan | null;
@@ -135,6 +137,7 @@ interface AppState {
   // settings
   setApiKey: (k: string) => void;
   setModel: (m: string) => void;
+  checkServerKey: () => Promise<void>;
   setPref: <K extends keyof Prefs>(key: K, value: Prefs[K]) => void;
   resetData: () => void;
 }
@@ -168,6 +171,7 @@ function emptyLive(): LiveState {
     inc: 5,
     rest: 0,
     restOn: false,
+    restEndsAt: 0,
     flash: false,
     pbFire: false,
   };
@@ -261,9 +265,17 @@ const INC_CYCLE = [2.5, 5, 10];
 
 function liftsToPlan(lifts: GeneratedLift[], sessions: Session[]): PlanLift[] {
   return lifts.map((l, i) => {
-    let kg = parseFloat(l.load);
-    if (Number.isNaN(kg)) kg = pbFor(sessions, l.name) || 0;
-    return { id: i + 1, name: l.name, sets: l.sets, reps: l.reps, kg: snapWeight(kg) };
+    const t = l.load.trim();
+    let kg: number;
+    if (/^[+-]/.test(t)) {
+      // progressive-overload delta ("+2.5") → resolve against the athlete's current PB
+      const base = pbFor(sessions, l.name) || lastTopFor(sessions, l.name)?.w || 0;
+      kg = base > 0 ? base + parseFloat(t) : 0; // no history yet → 0 (workingFor picks a sane start)
+    } else {
+      kg = parseFloat(t);
+      if (Number.isNaN(kg)) kg = pbFor(sessions, l.name) || 0; // "BW" etc.
+    }
+    return { id: i + 1, name: l.name, sets: l.sets, reps: l.reps, kg: snapWeight(Math.max(0, kg)) };
   });
 }
 
@@ -283,12 +295,6 @@ function stack(title: string): string {
   const t = (title || "Workout").trim();
   const i = t.lastIndexOf(" ");
   return i > 0 ? `${t.slice(0, i)}\n${t.slice(i + 1)}` : t;
-}
-
-function inferBans(prompt: string, known: string[]): string[] {
-  const p = prompt.toLowerCase();
-  if (!/\bno\b|\bavoid\b|\bwithout\b|\bskip\b/.test(p)) return [];
-  return known.filter((name) => name.toLowerCase().split(" ").every((part) => p.includes(part)));
 }
 
 export const useApp = create<AppState>()(
@@ -316,6 +322,7 @@ export const useApp = create<AppState>()(
       library: { query: "", category: "ALL" },
       apiKey: "",
       model: "anthropic/claude-sonnet-4.6",
+      serverHasKey: false,
       assistant: { status: "idle", plan: null, prompt: DEFAULT_PROMPT, error: null },
 
       go: (s) => set({ screen: s }),
@@ -434,7 +441,7 @@ export const useApp = create<AppState>()(
           const lifts = st.live.lifts;
           if (i < 0 || i >= lifts.length) return {} as Partial<AppState>;
           const wk = workingFor(lifts[i], st.live.entries, st.sessions);
-          return { live: { ...st.live, liftIndex: i, w: wk.w, r: wk.r, restOn: false, rest: 0 } };
+          return { live: { ...st.live, liftIndex: i, w: wk.w, r: wk.r, restOn: false, rest: 0, restEndsAt: 0 } };
         }),
 
       nextLift: () => get().selectLift(get().live.liftIndex + 1),
@@ -471,16 +478,21 @@ export const useApp = create<AppState>()(
               pbFire: beat,
               rest: st.prefs.rest_default,
               restOn: true,
+              restEndsAt: Date.now() + st.prefs.rest_default * 1000,
             },
           };
         }),
 
-      skipRest: () => set((st) => ({ live: { ...st.live, rest: 0, restOn: false } })),
+      skipRest: () => set((st) => ({ live: { ...st.live, rest: 0, restOn: false, restEndsAt: 0 } })),
       tickRest: () => {
         const { live } = get();
-        if (!live.restOn || live.rest <= 0) return;
-        const nr = live.rest - 1;
-        set({ live: { ...live, rest: nr, restOn: nr > 0 } });
+        if (!live.restOn) return;
+        // wall-clock anchored, so a reload or iOS backgrounding can't desync the countdown
+        const rest = live.restEndsAt
+          ? Math.max(0, Math.round((live.restEndsAt - Date.now()) / 1000))
+          : Math.max(0, live.rest - 1);
+        if (rest === live.rest && rest > 0) return;
+        set({ live: { ...live, rest, restOn: rest > 0 } });
       },
 
       finishWorkout: () =>
@@ -566,6 +578,25 @@ export const useApp = create<AppState>()(
 
       // ---- assistant ----
       generate: async (prompt) => {
+        const cur = get();
+        if (cur.assistant.status === "loading") return; // ignore rapid double-submit
+        // Refine: if a plan is already on screen, send it as the draft so the model
+        // edits THAT plan instead of starting over (live-AI path only).
+        const existing = cur.assistant.plan;
+        const draft = existing
+          ? {
+              title: existing.title.replace(/\n/g, " "),
+              focus: existing.focus,
+              duration_min: parseInt(existing.meta.match(/~(\d+)\s*MIN/i)?.[1] ?? "45", 10) || 45,
+              exercises: existing.lifts.map((l) => ({
+                name: l.name,
+                sets: l.sets,
+                reps: l.reps,
+                load: l.load,
+                note: l.note ?? "",
+              })),
+            }
+          : undefined;
         set((st) => ({ assistant: { ...st.assistant, status: "loading", prompt, error: null } }));
         const { prefs, stances, sessions, apiKey, model } = get();
         const context = buildClientContext({ prefs, stances, sessions });
@@ -573,7 +604,7 @@ export const useApp = create<AppState>()(
           const res = await fetch("/api/workout/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, context, apiKey: apiKey || undefined, model }),
+            body: JSON.stringify({ prompt, context, draft, apiKey: apiKey || undefined, model }),
           });
           if (!res.ok) throw new Error("generate failed");
           const data = (await res.json()) as { plan: GeneratedPlan };
@@ -589,14 +620,13 @@ export const useApp = create<AppState>()(
           const gen = st.assistant.plan;
           if (!gen) return { assistant: { ...st.assistant, status: "accepted" } };
           const newPlan = liftsToPlan(gen.lifts, st.sessions);
-          const bans = inferBans(gen.prompt, EXERCISES.map((e) => e.name));
-          const stances = { ...st.stances };
-          for (const b of bans) stances[b] = "banned";
+          // NOTE: we deliberately do NOT write durable banned stances from the prompt
+          // here — "no back squats" is a one-off request (already honoured by the
+          // generator), not a permanent preference. Bans are set explicitly in Library.
           return {
             plan: newPlan,
             planTitle: gen.title.replace(/\n/g, " "),
             planFocus: gen.focus,
-            stances,
             assistant: { ...st.assistant, status: "accepted" },
           };
         }),
@@ -607,8 +637,17 @@ export const useApp = create<AppState>()(
       // ---- settings ----
       setApiKey: (k) => set({ apiKey: k.trim() }),
       setModel: (m) => set({ model: m.trim() || "anthropic/claude-sonnet-4.6" }),
+      checkServerKey: async () => {
+        try {
+          const res = await fetch("/api/workout/generate");
+          if (res.ok) {
+            const { hasServerKey } = (await res.json()) as { hasServerKey?: boolean };
+            set({ serverHasKey: !!hasServerKey });
+          }
+        } catch {}
+      },
       setPref: (key, value) => set((st) => ({ prefs: { ...st.prefs, [key]: value } })),
-      resetData: () =>
+      resetData: () => {
         set({
           sessions: [],
           stances: {},
@@ -618,7 +657,20 @@ export const useApp = create<AppState>()(
           planFocus: "HYPERTROPHY",
           live: emptyLive(),
           assistant: { status: "idle", plan: null, prompt: DEFAULT_PROMPT, error: null },
-        }),
+        });
+        // authoritative wipe: replace the cloud doc so the session-merge can't resurrect it
+        const u = get().currentUser;
+        if (u) {
+          try {
+            localStorage.setItem(cacheKey(u.id), JSON.stringify(localData(get())));
+          } catch {}
+          void fetch("/api/state", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: u.id, data: cloudData(get()), replace: true }),
+          }).catch(() => {});
+        }
+      },
     }),
     {
       name: "maxed:device",

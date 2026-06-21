@@ -115,11 +115,11 @@ export function Home() {
           </button>
         </div>
         <button
-          onClick={startWorkout}
+          onClick={plan.length ? startWorkout : () => go("library")}
           style={{
             width: "100%",
             border: "none",
-            background: T.ink,
+            background: plan.length ? T.ink : T.line,
             color: T.bg,
             padding: 22,
             font: `400 32px/1 ${FONT.anton}`,
@@ -131,7 +131,8 @@ export function Home() {
             justifyContent: "space-between",
           }}
         >
-          Start workout<PlayTriangle s={20} color={T.accent} />
+          {plan.length ? "Start workout" : "Add lifts first"}
+          <PlayTriangle s={20} color={T.accent} />
         </button>
       </div>
     </ScreenBody>

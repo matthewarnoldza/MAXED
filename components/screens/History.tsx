@@ -81,11 +81,11 @@ export function History() {
                   <span style={{ font: `700 13px/1 ${FONT.mono}` }}>
                     {s.sets.map((st, j) => {
                       const isTop = st.w === top.w && st.r === top.r;
+                      // heaviest set of the session reads in full ink; the rest are muted
                       return (
-                        <span key={j}>
+                        <span key={j} style={{ color: st.pb ? T.accent : isTop ? T.ink : T.sub }}>
                           {num(st.w)}
-                          {st.pb && <span style={{ color: T.accent }}>★</span>}
-                          {!st.pb && isTop && <span style={{ color: T.sub }}> </span>}
+                          {st.pb && "★"}
                           {j < s.sets.length - 1 && <span style={{ color: T.sub }}> · </span>}
                         </span>
                       );

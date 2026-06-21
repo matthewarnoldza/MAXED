@@ -23,17 +23,6 @@ export interface SynthResult {
   lifts: GeneratedLift[];
 }
 
-/** A few accessory movements the seed library lacks, so "arms"/"pull" feel full. */
-const EXTRA: { name: string; cat: Category; m: string; equip: string }[] = [
-  { name: "Cable Curl", cat: "PULL", m: "BICEPS", equip: "cable" },
-  { name: "Hammer Curl", cat: "PULL", m: "BICEPS", equip: "dumbbell" },
-  { name: "Triceps Pushdown", cat: "PUSH", m: "TRICEPS", equip: "cable" },
-  { name: "Cable Fly", cat: "PUSH", m: "CHEST", equip: "cable" },
-  { name: "Face Pull", cat: "PULL", m: "DELTS", equip: "cable" },
-  { name: "Leg Curl", cat: "LEGS", m: "HAMS", equip: "machine" },
-  { name: "Calf Raise", cat: "LEGS", m: "CALVES", equip: "machine" },
-];
-
 interface Move {
   name: string;
   cat: Category;
@@ -41,15 +30,7 @@ interface Move {
   equip: string;
 }
 
-function dedupe(list: Move[]): Move[] {
-  const seen = new Set<string>();
-  return list.filter((mv) => (seen.has(mv.name) ? false : (seen.add(mv.name), true)));
-}
-
-const POOL: Move[] = dedupe([
-  ...EXERCISES.map((e) => ({ name: e.name, cat: e.cat, m: e.m, equip: EQUIPMENT[e.name] ?? "barbell" })),
-  ...EXTRA,
-]);
+const POOL: Move[] = EXERCISES.map((e) => ({ name: e.name, cat: e.cat, m: e.m, equip: EQUIPMENT[e.name] ?? "barbell" }));
 
 export function synthWorkout(input: SynthInput): SynthResult {
   const p = input.prompt.toLowerCase();
@@ -129,10 +110,13 @@ export function synthWorkout(input: SynthInput): SynthResult {
 
 function resolveFocus(p: string): { cats: Set<Category>; label: string } {
   const has = (...k: string[]) => k.some((w) => p.includes(w));
+  // Legs FIRST: "leg day, no back squats" must not be hijacked by the "back" in
+  // "back squats" matching the pull keywords. Arms are checked after push/pull so
+  // "warm up" (contains "arm") can't false-match.
+  if (has("leg", "squat", "quad", "glute", "ham", "calf", "lunge", "lower")) return { cats: new Set<Category>(["LEGS"]), label: "Leg" };
   if (has("push", "chest", "bench")) return { cats: new Set<Category>(["PUSH"]), label: "Push" };
   if (has("pull", "back", "row", "lat")) return { cats: new Set<Category>(["PULL"]), label: "Pull" };
-  if (has("leg", "squat", "quad", "glute", "lower")) return { cats: new Set<Category>(["LEGS"]), label: "Leg" };
-  if (has("arm", "bicep", "tricep", "curl")) return { cats: new Set<Category>(["PUSH", "PULL"]), label: "Arm" };
+  if (has("bicep", "tricep", "curl") || /\barms?\b/.test(p)) return { cats: new Set<Category>(["PUSH", "PULL"]), label: "Arm" };
   if (has("upper")) return { cats: new Set<Category>(["PUSH", "PULL"]), label: "Upper" };
   if (has("full", "total")) return { cats: new Set<Category>(["PUSH", "PULL", "LEGS"]), label: "Full Body" };
   return { cats: new Set<Category>(["PUSH", "PULL", "LEGS"]), label: "Full Body" };
@@ -157,18 +141,30 @@ function resolveScheme(goal: string, p: string): Scheme {
 }
 
 const COMPOUNDS = new Set([
-  "Back Squat",
-  "Bench Press",
-  "Deadlift",
-  "Overhead Press",
-  "Romanian Deadlift",
-  "Barbell Row",
-  "Pull-up",
-  "Leg Press",
+  "Barbell Bench Press",
+  "Incline Barbell Press",
   "Incline DB Press",
+  "Flat DB Press",
+  "Close-grip Bench Press",
+  "Back Squat",
+  "Front Squat",
+  "Hack Squat",
+  "Leg Press",
+  "Deadlift",
+  "Romanian Deadlift",
+  "Stiff-leg Deadlift",
+  "Overhead Press",
+  "Seated DB Press",
+  "Barbell Row",
+  "Pendlay Row",
+  "T-Bar Row",
+  "Pull-up",
+  "Chin-up",
+  "Lat Pulldown",
   "Dips",
   "Bulgarian Split Squat",
-  "Lat Pulldown",
+  "Hip Thrust",
+  "Power Clean",
 ]);
 function isCompound(name: string): boolean {
   return COMPOUNDS.has(name);

@@ -72,7 +72,7 @@ export function Launch() {
           <div style={{ position: "absolute", inset: "0 auto 0 0", background: T.accent, animation: "loadbar 1.5s ease-out forwards" }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", font: `700 10px/1 ${FONT.mono}`, letterSpacing: 2, color: T.sub }}>
-          <span>OFFLINE READY</span>
+          <span>CLOUD SYNCED</span>
           <span>v2.0</span>
         </div>
       </div>

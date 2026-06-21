@@ -36,6 +36,7 @@ export function AppShell() {
 
   // restore device state, then load the signed-in user's data from the cloud
   useEffect(() => {
+    useApp.getState().checkServerKey(); // honest "live AI" vs "offline coach" labels
     Promise.resolve(useApp.persist.rehydrate()).then(async () => {
       const st = useApp.getState();
       if (st.currentUser) await st.loadUser(st.currentUser.id, st.currentUser.name);

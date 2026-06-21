@@ -12,7 +12,8 @@ export const WORKOUT_SCHEMA = {
       duration_min: { type: "integer", description: "Estimated total minutes." },
       exercises: {
         type: "array",
-        minItems: 3,
+        // NOTE: no minItems — Anthropic structured output only accepts minItems 0|1,
+        // so the count requirement is enforced in the system prompt instead.
         items: {
           type: "object",
           additionalProperties: false,
@@ -44,5 +45,6 @@ Hard rules:
   express that as a "+x.x" delta in the load field when you're nudging a PB lift up.
 - Favour "loved" movements when they fit the requested focus.
 - Keep the session within the requested time budget; pick a realistic number of lifts.
+- Always return between 3 and 8 exercises (never fewer than 3).
 - Use kg. Bodyweight movements use "BW" for load.
 - Output ONLY the JSON object matching the provided schema. No prose.`;
